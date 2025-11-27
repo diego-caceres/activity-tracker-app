@@ -108,6 +108,18 @@ export async function logHabitEvent(date: string, event: HabitEvent): Promise<vo
     await updateDailyScore(date, event.scoreSnapshot);
 }
 
+export async function deleteHabitEvent(date: string, eventId: string): Promise<void> {
+    const events = await getHabitEvents(date);
+    const eventToDelete = events.find((e) => e.id === eventId);
+    if (!eventToDelete) return;
+
+    const newEvents = events.filter((e) => e.id !== eventId);
+    await redis.set(key.habits(date), newEvents);
+
+    // Reverse the score change
+    await updateDailyScore(date, -eventToDelete.scoreSnapshot);
+}
+
 async function updateDailyScore(date: string, delta: number): Promise<void> {
     await redis.incrby(key.score(date), delta);
 }

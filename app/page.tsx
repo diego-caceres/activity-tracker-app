@@ -1,5 +1,6 @@
 import { getTodos, getHabitDefinitions, getHabitEvents, getDailyScore, getDailyScores, getDailyNote } from '@/lib/data';
-import DailyLog from '@/components/DailyLog';
+import TodoList from '@/components/TodoList';
+import DailyNotes from '@/components/DailyNotes';
 import HabitTracker from '@/components/HabitTracker';
 import ScoreGrid from '@/components/ScoreGrid';
 import DateNavigation from '@/components/DateNavigation';
@@ -36,9 +37,9 @@ export default async function Home({
       <DateNavigation />
 
       <div className="flex-1 overflow-y-auto pb-20">
-        <ScoreGrid scores={calendarScores} />
+        <ScoreGrid scores={calendarScores} currentDate={date} />
 
-        <DailyLog date={date} todos={todos} note={dailyNote} />
+        <TodoList date={date} todos={todos} />
 
         <HabitTracker
           date={date}
@@ -46,6 +47,8 @@ export default async function Home({
           events={habitEvents}
           dailyScore={dailyScore}
         />
+
+        <DailyNotes date={date} note={dailyNote} />
       </div>
     </div>
   );

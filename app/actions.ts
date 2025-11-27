@@ -7,6 +7,7 @@ import {
     toggleTodo as toggleTodoData,
     addRecurringTodoTemplate,
     logHabitEvent,
+    deleteHabitEvent as deleteHabitEventData,
     saveHabitDefinition
 } from '@/lib/data';
 import { Todo, HabitEvent, HabitDefinition } from '@/types';
@@ -57,7 +58,7 @@ export async function logHabit(date: string, habitId: string, score: number) {
     revalidatePath('/');
 }
 
-export async function addHabitDefinition(name: string, type: 'healthy' | 'unhealthy', score: number, icon?: string) {
+export async function addHabitDefinition(date: string, name: string, type: 'healthy' | 'unhealthy', score: number, icon?: string) {
     const habit: HabitDefinition = {
         id: crypto.randomUUID(),
         name,
@@ -67,6 +68,13 @@ export async function addHabitDefinition(name: string, type: 'healthy' | 'unheal
     };
 
     await saveHabitDefinition(habit);
+
+    // Immediately log the habit
+    await logHabit(date, habit.id, score);
+}
+
+export async function deleteHabitEvent(date: string, eventId: string) {
+    await deleteHabitEventData(date, eventId);
     revalidatePath('/');
 }
 

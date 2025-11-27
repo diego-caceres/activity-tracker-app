@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { HabitDefinition, HabitEvent } from '@/types';
-import { logHabit, addHabitDefinition } from '@/app/actions';
-import { Plus, Activity, Zap, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { deleteHabitEvent, addHabitDefinition } from '@/app/actions';
+import { Plus, Activity, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PREDEFINED_HABITS } from '@/lib/constants';
 
@@ -16,28 +16,24 @@ interface HabitTrackerProps {
 
 export default function HabitTracker({ date, definitions, events, dailyScore }: HabitTrackerProps) {
     const [isAdding, setIsAdding] = useState(false);
-    const [newHabitName, setNewHabitName] = useState('');
-    const [newHabitType, setNewHabitType] = useState<'healthy' | 'unhealthy'>('healthy');
-    const [newHabitScore, setNewHabitScore] = useState(1);
 
-    const handleAddDefinition = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!newHabitName.trim()) return;
-
-        // Adjust score sign based on type
-        const score = newHabitType === 'healthy' ? Math.abs(newHabitScore) : -Math.abs(newHabitScore);
-
-        await addHabitDefinition(newHabitName, newHabitType, score);
-        setNewHabitName('');
-        setIsAdding(false);
+    const getHabitName = (habitId: string) => {
+        const definition = definitions.find(d => d.id === habitId);
+        return definition?.name || 'Unknown Habit';
     };
 
-    const getEventCount = (habitId: string) => {
-        return events.filter(e => e.habitId === habitId).length;
+    const getHabitIcon = (habitId: string) => {
+        const definition = definitions.find(d => d.id === habitId);
+        return definition?.icon;
+    };
+
+    const getHabitType = (habitId: string) => {
+        const definition = definitions.find(d => d.id === habitId);
+        return definition?.type;
     };
 
     return (
-        <div className="p-4 space-y-4 border-t bg-gray-50/50">
+        <div className="p-4 space-y-3 border-t bg-gray-50/50">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900">
                     <Activity className="w-5 h-5 text-gray-700" />
@@ -52,41 +48,52 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-                {definitions.map((habit) => (
-                    <button
-                        key={habit.id}
-                        onClick={() => logHabit(date, habit.id, habit.score)}
-                        className={cn(
-                            "p-3 rounded-xl border shadow-sm flex flex-col items-center justify-center gap-2 transition-all active:scale-95",
-                            habit.type === 'healthy'
-                                ? "bg-white border-green-200 hover:border-green-400 hover:bg-green-50"
-                                : "bg-white border-red-200 hover:border-red-400 hover:bg-red-50"
-                        )}
-                    >
-                        <div className="flex items-center gap-2">
-                            {habit.type === 'healthy' ? <ThumbsUp className="w-4 h-4 text-green-500" /> : <ThumbsDown className="w-4 h-4 text-red-500" />}
-                            <span className="font-medium text-sm">{habit.name}</span>
+            {/* Logged Habits List */}
+            <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
+                {events.length === 0 && (
+                    <div className="p-4 text-gray-500 text-center">No habits logged today.</div>
+                )}
+
+                {events.map((event, index) => (
+                    <div key={event.id}>
+                        <div className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                            {getHabitIcon(event.habitId) && (
+                                <span className="text-xl flex-shrink-0">{getHabitIcon(event.habitId)}</span>
+                            )}
+                            <span className="flex-1 text-gray-900">{getHabitName(event.habitId)}</span>
+                            <span className={cn(
+                                "text-sm font-medium flex-shrink-0",
+                                getHabitType(event.habitId) === 'healthy' ? "text-green-600" : "text-red-600"
+                            )}>
+                                {event.scoreSnapshot > 0 ? '+' : ''}{event.scoreSnapshot}
+                            </span>
+                            <button
+                                onClick={() => deleteHabitEvent(date, event.id)}
+                                className="text-gray-400 hover:text-red-500 p-1 transition-colors"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
                         </div>
-                        <div className="text-xs text-gray-400 font-mono">
-                            {habit.score > 0 ? '+' : ''}{habit.score} pts • {getEventCount(habit.id)} today
-                        </div>
-                    </button>
+                        {index < events.length - 1 && <div className="border-t border-gray-100 ml-14" />}
+                    </div>
                 ))}
 
+                {/* Add Habit Button at the bottom */}
+                {events.length > 0 && <div className="border-t border-gray-200" />}
                 <button
                     onClick={() => setIsAdding(!isAdding)}
-                    className="p-3 rounded-xl border border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 text-blue-500 hover:bg-gray-100 transition-colors"
                 >
-                    <Plus className="w-6 h-6" />
-                    <span className="text-xs">Add Habit</span>
+                    <Plus className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-gray-600">Add Habit</span>
                 </button>
             </div>
 
+            {/* Habit Selection Modal */}
             {isAdding && (
                 <div className="p-4 bg-white rounded-xl border shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
                     <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-sm">Select a Habit to Track</h3>
+                        <h3 className="font-semibold text-sm text-gray-900">Select a Habit to Log</h3>
                         <button
                             onClick={() => setIsAdding(false)}
                             className="text-gray-400 hover:text-gray-600"
@@ -100,7 +107,7 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
                             <button
                                 key={habit.name}
                                 onClick={() => {
-                                    addHabitDefinition(habit.name, habit.type, habit.score);
+                                    addHabitDefinition(date, habit.name, habit.type, habit.score, habit.icon);
                                     setIsAdding(false);
                                 }}
                                 className={cn(
@@ -111,7 +118,7 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
                                 )}
                             >
                                 <span className="text-lg">{habit.icon}</span>
-                                <span className="font-medium">{habit.name}</span>
+                                <span className="font-medium text-gray-900">{habit.name}</span>
                                 <span className={cn(
                                     "text-xs",
                                     habit.type === 'healthy' ? "text-green-600" : "text-red-600"

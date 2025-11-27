@@ -2,16 +2,19 @@
 
 import { useState } from 'react';
 import { DailyScore } from '@/types';
-import { format, parseISO, startOfMonth, endOfMonth, subDays, eachDayOfInterval, addMonths, subMonths } from 'date-fns';
+import { format, parseISO, startOfMonth, endOfMonth, subDays, eachDayOfInterval, addMonths, subMonths, getDate, startOfWeek } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface ScoreGridProps {
     scores: DailyScore[];
     initialMonth?: string; // YYYY-MM format
+    currentDate?: string; // YYYY-MM-DD format for highlighting
 }
 
-export default function ScoreGrid({ scores, initialMonth }: ScoreGridProps) {
+export default function ScoreGrid({ scores, initialMonth, currentDate }: ScoreGridProps) {
+    const router = useRouter();
     const [currentMonth, setCurrentMonth] = useState(() => {
         return initialMonth || format(new Date(), 'yyyy-MM');
     });
@@ -45,10 +48,19 @@ export default function ScoreGrid({ scores, initialMonth }: ScoreGridProps) {
         setCurrentMonth(format(next, 'yyyy-MM'));
     };
 
+    const handleDayClick = (dateStr: string) => {
+        router.push(`/?date=${dateStr}`);
+    };
+
     const isCurrentMonth = currentMonth === format(new Date(), 'yyyy-MM');
 
+    // Get day of week labels (S, M, T, W, T, F, S)
+    const weekStart = startOfWeek(new Date());
+    const weekDays = eachDayOfInterval({ start: weekStart, end: addMonths(weekStart, 0).setDate(weekStart.getDate() + 6) });
+    const dayLabels = weekDays.map(day => format(day, 'EEEEE')); // Single letter day names
+
     return (
-        <div className="p-4 border-t bg-white">
+        <div className="p-4 border-t bg-white max-h-[40vh] flex flex-col">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900">
                     {format(parseISO(`${currentMonth}-01`), 'MMMM yyyy')}
@@ -75,24 +87,40 @@ export default function ScoreGrid({ scores, initialMonth }: ScoreGridProps) {
                 </div>
             </div>
 
-            <div className="w-full">
-                <div className="grid grid-rows-7 grid-flow-col gap-2 w-full">
+            <div className="flex-1">
+                {/* Day of week headers */}
+                <div className="grid grid-cols-7 gap-2 mb-2">
+                    {dayLabels.map((label, index) => (
+                        <div key={index} className="text-center text-xs font-semibold text-gray-500">
+                            {label}
+                        </div>
+                    ))}
+                </div>
+
+                <div className="grid grid-cols-7 gap-2 h-full">
                     {days.map((day) => {
                         const dateStr = format(day, 'yyyy-MM-dd');
                         const scoreData = scores.find((s) => s.date === dateStr);
                         const score = scoreData ? scoreData.score : 0;
                         const isPreviousMonth = format(day, 'yyyy-MM') !== currentMonth;
+                        const dayNumber = getDate(day);
+                        const isSelected = currentDate === dateStr;
 
                         return (
-                            <div
+                            <button
                                 key={dateStr}
+                                onClick={() => handleDayClick(dateStr)}
                                 className={cn(
-                                    "w-full aspect-square rounded-md transition-all hover:scale-105 cursor-pointer",
+                                    "aspect-square rounded-md transition-all hover:scale-105 cursor-pointer flex items-center justify-center text-sm font-semibold",
                                     getScoreColor(score),
-                                    isPreviousMonth && "opacity-30"
+                                    isPreviousMonth && "opacity-30",
+                                    score >= 5 || score <= -5 ? "text-white" : "text-gray-700",
+                                    isSelected && "ring-4 ring-blue-500 ring-offset-2 scale-105"
                                 )}
                                 title={`${format(day, 'MMM d')}: ${score > 0 ? '+' : ''}${score} pts`}
-                            />
+                            >
+                                {dayNumber}
+                            </button>
                         );
                     })}
                 </div>
