@@ -1,5 +1,5 @@
 import { redis } from './redis';
-import { Todo, HabitEvent, HabitDefinition, DailyScore, DailyNote } from '@/types';
+import { Todo, HabitEvent, HabitDefinition, DailyScore, DailyNote, Goal, GoalProgress, GoalAchievement } from '@/types';
 import { format, eachDayOfInterval, parseISO, subDays } from 'date-fns';
 
 // Keys
@@ -10,6 +10,12 @@ const key = {
     notes: (date: string) => `notes:day:${date}`,
     settingsHabits: 'settings:habits',
     settingsRecurring: 'settings:recurring_todos',
+    goals: 'goals:active',
+    goalById: (id: string) => `goal:${id}`,
+    goalProgress: (goalId: string, date: string) => `goal:${goalId}:progress:${date}`,
+    goalAchievements: 'goals:achievements',
+    goalAchievementById: (id: string) => `goal:achievement:${id}`,
+    goalsArchived: 'goals:archived',
 };
 
 // --- Todos ---
@@ -193,4 +199,218 @@ export async function calculateStreak(endDate: string): Promise<number> {
     }
 
     return streak;
+}
+
+// --- Goals ---
+
+export async function getActiveGoals(): Promise<Goal[]> {
+    const goalIds = await redis.get<string[]>(key.goals) || [];
+    if (goalIds.length === 0) return [];
+
+    const pipeline = redis.pipeline();
+    goalIds.forEach(id => pipeline.get(key.goalById(id)));
+    const results = await pipeline.exec();
+
+    return results.filter(Boolean) as Goal[];
+}
+
+export async function getGoalById(goalId: string): Promise<Goal | null> {
+    return await redis.get<Goal>(key.goalById(goalId));
+}
+
+export async function saveGoal(goal: Goal): Promise<void> {
+    // Save goal object
+    await redis.set(key.goalById(goal.id), goal);
+
+    // Add to active goals list if active
+    if (goal.status === 'active') {
+        const goals = await redis.get<string[]>(key.goals) || [];
+        if (!goals.includes(goal.id)) {
+            goals.push(goal.id);
+            await redis.set(key.goals, goals);
+        }
+    }
+}
+
+export async function updateGoalData(
+    goalId: string,
+    updates: Partial<Goal>
+): Promise<void> {
+    const goal = await getGoalById(goalId);
+    if (!goal) return;
+
+    const updatedGoal = {
+        ...goal,
+        ...updates,
+        updatedAt: Date.now()
+    };
+
+    await redis.set(key.goalById(goalId), updatedGoal);
+}
+
+export async function archiveGoalData(goalId: string): Promise<void> {
+    const goal = await getGoalById(goalId);
+    if (!goal) return;
+
+    // Update status
+    goal.status = 'archived';
+    goal.updatedAt = Date.now();
+    await redis.set(key.goalById(goalId), goal);
+
+    // Move from active to archived list
+    const activeGoals = await redis.get<string[]>(key.goals) || [];
+    const archivedGoals = await redis.get<string[]>(key.goalsArchived) || [];
+
+    await redis.set(
+        key.goals,
+        activeGoals.filter(id => id !== goalId)
+    );
+
+    if (!archivedGoals.includes(goalId)) {
+        archivedGoals.push(goalId);
+        await redis.set(key.goalsArchived, archivedGoals);
+    }
+}
+
+export async function deleteGoalData(goalId: string): Promise<void> {
+    // Remove from active or archived list
+    const activeGoals = await redis.get<string[]>(key.goals) || [];
+    const archivedGoals = await redis.get<string[]>(key.goalsArchived) || [];
+
+    await redis.set(key.goals, activeGoals.filter(id => id !== goalId));
+    await redis.set(key.goalsArchived, archivedGoals.filter(id => id !== goalId));
+
+    // Delete goal object
+    await redis.del(key.goalById(goalId));
+}
+
+export async function getGoalProgress(
+    goalId: string,
+    date: string
+): Promise<GoalProgress | null> {
+    return await redis.get<GoalProgress>(
+        key.goalProgress(goalId, date)
+    );
+}
+
+export async function saveGoalProgress(
+    progress: GoalProgress
+): Promise<void> {
+    await redis.set(
+        key.goalProgress(progress.goalId, progress.date),
+        progress,
+        { ex: 3600 } // 1 hour TTL
+    );
+}
+
+export async function getAchievements(): Promise<GoalAchievement[]> {
+    const achievementIds = await redis.get<string[]>(
+        key.goalAchievements
+    ) || [];
+
+    if (achievementIds.length === 0) return [];
+
+    const pipeline = redis.pipeline();
+    achievementIds.forEach(id =>
+        pipeline.get(key.goalAchievementById(id))
+    );
+    const results = await pipeline.exec();
+
+    return results.filter(Boolean) as GoalAchievement[];
+}
+
+export async function recordAchievement(
+    goal: Goal,
+    date: string,
+    progress: number
+): Promise<GoalAchievement> {
+    const achievement: GoalAchievement = {
+        id: crypto.randomUUID(),
+        goalId: goal.id,
+        achievedDate: date,
+        achievedAt: Date.now(),
+        finalProgress: progress,
+        goalSnapshot: { ...goal },
+    };
+
+    // Save achievement
+    await redis.set(
+        key.goalAchievementById(achievement.id),
+        achievement
+    );
+
+    // Add to achievements list
+    const achievements = await redis.get<string[]>(
+        key.goalAchievements
+    ) || [];
+    achievements.push(achievement.id);
+    await redis.set(key.goalAchievements, achievements);
+
+    // Update goal status
+    await updateGoalData(goal.id, {
+        status: 'completed',
+        achievedAt: Date.now(),
+    });
+
+    return achievement;
+}
+
+// Helper: Get habit count for period
+export async function getHabitCountForPeriod(
+    habitId: string,
+    startDate: string,
+    endDate: string
+): Promise<number> {
+    const scores = await getDailyScores(startDate, endDate);
+    let count = 0;
+
+    for (const { date } of scores) {
+        const events = await getHabitEvents(date);
+        count += events.filter(e => e.habitId === habitId).length;
+    }
+
+    return count;
+}
+
+// Helper: Get todo completion rate
+export async function getTodoCompletionRate(
+    startDate: string,
+    endDate: string
+): Promise<number> {
+    const dates = eachDayOfInterval({
+        start: parseISO(startDate),
+        end: parseISO(endDate),
+    }).map(d => format(d, 'yyyy-MM-dd'));
+
+    let totalTodos = 0;
+    let completedTodos = 0;
+
+    for (const date of dates) {
+        const todos = await getTodos(date);
+        totalTodos += todos.length;
+        completedTodos += todos.filter(t => t.status === 'done').length;
+    }
+
+    return totalTodos === 0 ? 0 : (completedTodos / totalTodos) * 100;
+}
+
+// Helper: Get healthy habit count
+export async function getHealthyHabitCount(
+    startDate: string,
+    endDate: string
+): Promise<number> {
+    const scores = await getDailyScores(startDate, endDate);
+    let count = 0;
+
+    const definitions = await getHabitDefinitions();
+    const healthyIds = definitions
+        .filter(d => d.type === 'healthy')
+        .map(d => d.id);
+
+    for (const { date } of scores) {
+        const events = await getHabitEvents(date);
+        count += events.filter(e => healthyIds.includes(e.habitId)).length;
+    }
+
+    return count;
 }

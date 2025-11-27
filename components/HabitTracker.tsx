@@ -61,8 +61,7 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
         return definition?.type;
     };
 
-    const handleAddHabit = async (name: string, type: 'healthy' | 'unhealthy', score: number, icon?: string) => {
-        const habitId = crypto.randomUUID();
+    const handleAddHabit = async (habitId: string, name: string, type: 'healthy' | 'unhealthy', score: number, icon?: string) => {
         const newEvent: HabitEvent = {
             id: crypto.randomUUID(),
             habitId,
@@ -71,7 +70,9 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
             scoreSnapshot: score,
         };
 
-        const newDefinition: HabitDefinition = {
+        // Check if definition already exists
+        const existingDefinition = optimisticState.definitions.find(d => d.id === habitId);
+        const newDefinition: HabitDefinition = existingDefinition || {
             id: habitId,
             name,
             type,
@@ -82,11 +83,16 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
         setIsAdding(null);
 
         startTransition(() => {
-            updateOptimisticState({ type: 'add', event: newEvent, definition: newDefinition });
+            if (!existingDefinition) {
+                updateOptimisticState({ type: 'add', event: newEvent, definition: newDefinition });
+            } else {
+                // Definition already exists, just add the event
+                updateOptimisticState({ type: 'add', event: newEvent, definition: newDefinition });
+            }
             updateOptimisticScore(score);
         });
 
-        await addHabitDefinition(date, name, type, score, icon);
+        await addHabitDefinition(date, habitId, name, type, score, icon);
     };
 
     const handleDeleteEvent = async (eventId: string, score: number) => {
@@ -182,8 +188,8 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-1">
                         {PREDEFINED_HABITS.filter(habit => habit.type === isAdding).map((habit) => (
                             <button
-                                key={habit.name}
-                                onClick={() => handleAddHabit(habit.name, habit.type, habit.score, habit.icon)}
+                                key={habit.id}
+                                onClick={() => handleAddHabit(habit.id, habit.name, habit.type, habit.score, habit.icon)}
                                 className={cn(
                                     "p-2 rounded-lg border text-left text-sm transition-colors flex flex-col gap-1 dark:bg-gray-700/50 dark:border-gray-600",
                                     habit.type === 'healthy'

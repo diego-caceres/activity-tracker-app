@@ -35,3 +35,50 @@ export interface DailyNote {
   content: string;
   updatedAt: number;
 }
+
+// --- Goals ---
+
+export type GoalType =
+  | 'daily_score'
+  | 'weekly_score'
+  | 'streak'
+  | 'habit_count'
+  | 'todo_completion'
+  | 'habit_frequency';
+
+export type GoalPeriod = 'daily' | 'weekly' | 'monthly' | 'custom';
+export type GoalStatus = 'active' | 'completed' | 'archived';
+
+export interface Goal {
+  id: string;
+  type: GoalType;
+  title: string;
+  description?: string;
+  target: number;
+  period: GoalPeriod;
+  startDate: string;
+  endDate?: string;
+  habitId?: string;
+  status: GoalStatus;
+  createdAt: number;
+  updatedAt: number;
+  achievedAt?: number;
+  currentProgress?: number;
+}
+
+export interface GoalProgress {
+  goalId: string;
+  date: string;
+  progress: number;
+  isAchieved: boolean;
+  checkedAt: number;
+}
+
+export interface GoalAchievement {
+  id: string;
+  goalId: string;
+  achievedDate: string;
+  achievedAt: number;
+  finalProgress: number;
+  goalSnapshot: Goal;
+}
