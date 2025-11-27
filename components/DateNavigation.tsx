@@ -29,18 +29,18 @@ export default function DateNavigation() {
     return (
         <div className="flex items-center justify-between p-4 bg-white border-b sticky top-0 z-10">
             <button onClick={handlePrev} className="p-2 hover:bg-gray-100 rounded-full">
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
 
             <div className="flex flex-col items-center">
-                <span className="font-bold text-lg">{format(currentDate, 'EEEE, MMM d')}</span>
-                <span className="text-xs text-gray-500 cursor-pointer" onClick={handleToday}>
+                <span className="font-bold text-lg text-gray-900">{format(currentDate, 'EEEE, MMM d')}</span>
+                <span className="text-xs text-gray-600 cursor-pointer hover:text-gray-900" onClick={handleToday}>
                     {dateParam ? 'Go to Today' : 'Today'}
                 </span>
             </div>
 
             <button onClick={handleNext} className="p-2 hover:bg-gray-100 rounded-full">
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-6 h-6 text-gray-900" />
             </button>
         </div>
     );

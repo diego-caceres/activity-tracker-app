@@ -19,10 +19,10 @@ export default function ScoreGrid({ scores, initialMonth, currentDate }: ScoreGr
         return initialMonth || format(new Date(), 'yyyy-MM');
     });
 
-    // Calculate date range: last 4 days of previous month + current month
+    // Calculate date range: start from Sunday of the week containing the 1st of the month
     const monthStart = startOfMonth(parseISO(`${currentMonth}-01`));
     const monthEnd = endOfMonth(monthStart);
-    const rangeStart = subDays(monthStart, 4);
+    const rangeStart = startOfWeek(monthStart, { weekStartsOn: 0 }); // 0 = Sunday
     const days = eachDayOfInterval({ start: rangeStart, end: monthEnd });
 
     const getScoreColor = (score: number) => {
@@ -54,13 +54,11 @@ export default function ScoreGrid({ scores, initialMonth, currentDate }: ScoreGr
 
     const isCurrentMonth = currentMonth === format(new Date(), 'yyyy-MM');
 
-    // Get day of week labels (S, M, T, W, T, F, S)
-    const weekStart = startOfWeek(new Date());
-    const weekDays = eachDayOfInterval({ start: weekStart, end: addMonths(weekStart, 0).setDate(weekStart.getDate() + 6) });
-    const dayLabels = weekDays.map(day => format(day, 'EEEEE')); // Single letter day names
+    // Day of week labels (S, M, T, W, T, F, S) - Sunday first
+    const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
     return (
-        <div className="p-4 border-t bg-white max-h-[40vh] flex flex-col">
+        <div className="p-4 border-t bg-white">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900">
                     {format(parseISO(`${currentMonth}-01`), 'MMMM yyyy')}
@@ -87,17 +85,16 @@ export default function ScoreGrid({ scores, initialMonth, currentDate }: ScoreGr
                 </div>
             </div>
 
-            <div className="flex-1">
-                {/* Day of week headers */}
-                <div className="grid grid-cols-7 gap-2 mb-2">
-                    {dayLabels.map((label, index) => (
-                        <div key={index} className="text-center text-xs font-semibold text-gray-500">
-                            {label}
-                        </div>
-                    ))}
-                </div>
+            {/* Day of week headers */}
+            <div className="grid grid-cols-7 gap-2 mb-2">
+                {dayLabels.map((label, index) => (
+                    <div key={index} className="text-center text-xs font-semibold text-gray-500">
+                        {label}
+                    </div>
+                ))}
+            </div>
 
-                <div className="grid grid-cols-7 gap-2 h-full">
+            <div className="grid grid-cols-7 gap-2">
                     {days.map((day) => {
                         const dateStr = format(day, 'yyyy-MM-dd');
                         const scoreData = scores.find((s) => s.date === dateStr);
@@ -123,7 +120,6 @@ export default function ScoreGrid({ scores, initialMonth, currentDate }: ScoreGr
                             </button>
                         );
                     })}
-                </div>
             </div>
 
             <div className="flex items-center justify-end gap-3 text-sm text-gray-600 mt-4">

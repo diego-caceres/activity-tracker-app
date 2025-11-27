@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useOptimistic, startTransition } from 'react';
 import { Todo } from '@/types';
 import { addTodo, deleteTodo, toggleTodo } from '@/app/actions';
 import { Check, Trash2, Plus, Repeat } from 'lucide-react';
@@ -11,17 +11,75 @@ interface TodoListProps {
     todos: Todo[];
 }
 
+type TodoAction =
+    | { type: 'add'; todo: Todo }
+    | { type: 'delete'; id: string }
+    | { type: 'toggle'; id: string; status: 'pending' | 'done' };
+
 export default function TodoList({ date, todos }: TodoListProps) {
     const [newTodoTitle, setNewTodoTitle] = useState('');
     const [isRecurring, setIsRecurring] = useState(false);
+
+    const [optimisticTodos, updateOptimisticTodos] = useOptimistic(
+        todos,
+        (state: Todo[], action: TodoAction) => {
+            switch (action.type) {
+                case 'add':
+                    return [...state, action.todo];
+                case 'delete':
+                    return state.filter(t => t.id !== action.id);
+                case 'toggle':
+                    return state.map(t =>
+                        t.id === action.id ? { ...t, status: action.status } : t
+                    );
+                default:
+                    return state;
+            }
+        }
+    );
 
     const handleAddTodo = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newTodoTitle.trim()) return;
 
-        await addTodo(date, newTodoTitle, isRecurring);
+        const newTodo: Todo = {
+            id: crypto.randomUUID(),
+            title: newTodoTitle,
+            status: 'pending',
+            date,
+            isRecurring,
+            createdAt: Date.now(),
+        };
+
+        const title = newTodoTitle;
+        const recurring = isRecurring;
+
         setNewTodoTitle('');
         setIsRecurring(false);
+
+        startTransition(() => {
+            updateOptimisticTodos({ type: 'add', todo: newTodo });
+        });
+
+        await addTodo(date, title, recurring);
+    };
+
+    const handleToggleTodo = async (id: string, currentStatus: 'pending' | 'done') => {
+        const newStatus = currentStatus === 'done' ? 'pending' : 'done';
+
+        startTransition(() => {
+            updateOptimisticTodos({ type: 'toggle', id, status: newStatus });
+        });
+
+        await toggleTodo(date, id, newStatus);
+    };
+
+    const handleDeleteTodo = async (id: string) => {
+        startTransition(() => {
+            updateOptimisticTodos({ type: 'delete', id });
+        });
+
+        await deleteTodo(date, id);
     };
 
     return (
@@ -29,15 +87,15 @@ export default function TodoList({ date, todos }: TodoListProps) {
             <h2 className="text-xl font-bold text-gray-900">Todos</h2>
 
             <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
-                {todos.length === 0 && (
+                {optimisticTodos.length === 0 && (
                     <div className="p-4 text-gray-500 text-center">No todos for this day.</div>
                 )}
 
-                {todos.map((todo, index) => (
+                {optimisticTodos.map((todo, index) => (
                     <div key={todo.id}>
                         <div className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
                             <button
-                                onClick={() => toggleTodo(date, todo.id, todo.status === 'done' ? 'pending' : 'done')}
+                                onClick={() => handleToggleTodo(todo.id, todo.status)}
                                 className={cn(
                                     "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",
                                     todo.status === 'done'
@@ -62,18 +120,18 @@ export default function TodoList({ date, todos }: TodoListProps) {
                             )}
 
                             <button
-                                onClick={() => deleteTodo(date, todo.id)}
+                                onClick={() => handleDeleteTodo(todo.id)}
                                 className="text-gray-400 hover:text-red-500 p-1 transition-colors"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         </div>
-                        {index < todos.length - 1 && <div className="border-t border-gray-100 ml-14" />}
+                        {index < optimisticTodos.length - 1 && <div className="border-t border-gray-100 ml-14" />}
                     </div>
                 ))}
 
                 {/* Add Todo Input at the bottom */}
-                {todos.length > 0 && <div className="border-t border-gray-200" />}
+                {optimisticTodos.length > 0 && <div className="border-t border-gray-200" />}
                 <form onSubmit={handleAddTodo} className="flex items-center gap-3 px-4 py-3 bg-gray-50">
                     <Plus className="w-5 h-5 text-blue-500 flex-shrink-0" />
                     <input
