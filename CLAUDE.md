@@ -82,7 +82,7 @@ GET endpoint at `/api/export?date=YYYY-MM-DD` that:
 
 ## Environment Variables
 
-Required environment variables (add to `.env.local`):
+Required environment variables (add to `.env.local` for local development):
 
 ```
 UPSTASH_REDIS_REST_URL=https://your-redis-url.upstash.io
@@ -90,6 +90,8 @@ UPSTASH_REDIS_REST_TOKEN=your-token
 ```
 
 The app will warn in console if these are missing but won't crash (Redis calls will fail).
+
+For deployment, see `.env.example` for the template and `DEPLOYMENT.md` for detailed deployment instructions.
 
 ## TypeScript Paths
 
@@ -102,4 +104,14 @@ The project uses `@/*` path alias to reference the root directory (configured in
 - **date-fns**: Date manipulation and formatting
 - **@dsnp/parquetjs**: Parquet file generation for exports
 - **lucide-react**: Icon library
-- **Tailwind CSS**: Styling
+- **Tailwind CSS v4**: Styling with class-based dark mode
+- **next-themes**: Theme switching (light/dark mode)
+
+## Deployment
+
+This application is ready for deployment on Vercel. See `DEPLOYMENT.md` for comprehensive deployment instructions including:
+- Upstash Redis setup
+- Vercel deployment via Dashboard or CLI
+- Environment variable configuration
+- Custom domain setup
+- Troubleshooting guide

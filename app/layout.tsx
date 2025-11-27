@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Daily Tracker",
   description: "Track your daily habits and tasks",
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
