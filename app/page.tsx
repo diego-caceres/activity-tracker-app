@@ -1,9 +1,11 @@
-import { getTodos, getHabitDefinitions, getHabitEvents, getDailyScore, getDailyScores, getDailyNote } from '@/lib/data';
+import { getTodos, getHabitDefinitions, getHabitEvents, getDailyScore, getDailyScores, getDailyNote, calculateStreak } from '@/lib/data';
 import TodoList from '@/components/TodoList';
 import DailyNotes from '@/components/DailyNotes';
 import HabitTracker from '@/components/HabitTracker';
+import WeeklyChart from '@/components/WeeklyChart';
 import ScoreGrid from '@/components/ScoreGrid';
 import DateNavigation from '@/components/DateNavigation';
+import StreakCounter from '@/components/StreakCounter';
 import { format, subDays, startOfMonth, subMonths } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
@@ -17,12 +19,13 @@ export default async function Home({
   const date = dateParam || format(new Date(), 'yyyy-MM-dd');
 
   // Fetch data for the main view
-  const [todos, habitDefinitions, habitEvents, dailyScore, dailyNote] = await Promise.all([
+  const [todos, habitDefinitions, habitEvents, dailyScore, dailyNote, streak] = await Promise.all([
     getTodos(date),
     getHabitDefinitions(),
     getHabitEvents(date),
     getDailyScore(date),
     getDailyNote(date),
+    calculateStreak(date),
   ]);
 
   // Fetch data for the calendar (current month + previous month for navigation)
@@ -32,9 +35,16 @@ export default async function Home({
   const startDate = format(subMonths(startOfMonth(today), 1), 'yyyy-MM-dd'); // Start from previous month
   const calendarScores = await getDailyScores(startDate, endDate);
 
+  // Fetch data for weekly chart (last 7 days)
+  const weeklyStart = format(subDays(today, 6), 'yyyy-MM-dd');
+  const weeklyScores = await getDailyScores(weeklyStart, endDate);
+
   return (
     <div className="flex flex-col h-full">
-      <DateNavigation />
+      <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-0 z-10">
+        <DateNavigation />
+        <StreakCounter currentStreak={streak} />
+      </div>
 
       <div className="flex-1 overflow-y-auto pb-20">
         <ScoreGrid scores={calendarScores} currentDate={date} />
@@ -47,6 +57,8 @@ export default async function Home({
           events={habitEvents}
           dailyScore={dailyScore}
         />
+
+        <WeeklyChart scores={weeklyScores} />
 
         <DailyNotes date={date} note={dailyNote} />
       </div>

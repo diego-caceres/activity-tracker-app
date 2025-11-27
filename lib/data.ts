@@ -1,6 +1,6 @@
 import { redis } from './redis';
 import { Todo, HabitEvent, HabitDefinition, DailyScore, DailyNote } from '@/types';
-import { format, eachDayOfInterval, parseISO } from 'date-fns';
+import { format, eachDayOfInterval, parseISO, subDays } from 'date-fns';
 
 // Keys
 const key = {
@@ -160,4 +160,37 @@ export async function saveDailyNote(date: string, content: string): Promise<void
         updatedAt: Date.now(),
     };
     await redis.set(key.notes(date), note);
+}
+
+export async function calculateStreak(endDate: string): Promise<number> {
+    // We'll check the last 30 days for efficiency, assuming streaks rarely exceed that without checking
+    // For a robust solution, we might need to check further back or store streak in a separate key
+    const end = parseISO(endDate);
+    const start = subDays(end, 60); // Check last 60 days
+
+    const scores = await getDailyScores(format(start, 'yyyy-MM-dd'), endDate);
+
+    // Sort by date descending (newest first)
+    const sortedScores = scores.sort((a, b) => b.date.localeCompare(a.date));
+
+    let streak = 0;
+    // Check if today has a score (if not, start checking from yesterday)
+    // Actually, for a streak, we usually count consecutive days up to yesterday OR today if completed
+
+    for (const day of sortedScores) {
+        if (day.score > 0) {
+            streak++;
+        } else if (day.score === 0) {
+            // If it's today and 0, we don't break yet (maybe they haven't logged yet)
+            // But if it's a past day and 0, streak is broken
+            if (day.date !== endDate) {
+                break;
+            }
+        } else {
+            // Negative score breaks streak
+            break;
+        }
+    }
+
+    return streak;
 }

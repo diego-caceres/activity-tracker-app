@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Daily Tracker",
-  description: "Personal daily activity tracker",
+  description: "Track your daily habits and tasks",
 };
 
 export default function RootLayout({
@@ -16,11 +16,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={cn(inter.className, "bg-gray-50 text-gray-900 min-h-screen")}>
-        <main className="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col">
-          {children}
-        </main>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${inter.className} antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="max-w-md mx-auto h-screen bg-white dark:bg-gray-900 shadow-2xl overflow-hidden flex flex-col">
+            {children}
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

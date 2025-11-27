@@ -2,6 +2,7 @@
 
 import { format, addDays, subDays, parseISO } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -27,21 +28,26 @@ export default function DateNavigation() {
     };
 
     return (
-        <div className="flex items-center justify-between p-4 bg-white border-b sticky top-0 z-10">
-            <button onClick={handlePrev} className="p-2 hover:bg-gray-100 rounded-full">
-                <ChevronLeft className="w-6 h-6 text-gray-900" />
-            </button>
+        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-0 z-10">
+            <div className="flex items-center gap-2">
+                <button onClick={handlePrev} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                    <ChevronLeft className="w-6 h-6 text-gray-900 dark:text-gray-100" />
+                </button>
+            </div>
 
             <div className="flex flex-col items-center">
-                <span className="font-bold text-lg text-gray-900">{format(currentDate, 'EEEE, MMM d')}</span>
-                <span className="text-xs text-gray-600 cursor-pointer hover:text-gray-900" onClick={handleToday}>
+                <span className="font-bold text-lg text-gray-900 dark:text-gray-100">{format(currentDate, 'EEEE, MMM d')}</span>
+                <span className="text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200" onClick={handleToday}>
                     {dateParam ? 'Go to Today' : 'Today'}
                 </span>
             </div>
 
-            <button onClick={handleNext} className="p-2 hover:bg-gray-100 rounded-full">
-                <ChevronRight className="w-6 h-6 text-gray-900" />
-            </button>
+            <div className="flex items-center gap-2">
+                <button onClick={handleNext} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                    <ChevronRight className="w-6 h-6 text-gray-900 dark:text-gray-100" />
+                </button>
+                <ThemeToggle />
+            </div>
         </div>
     );
 }
