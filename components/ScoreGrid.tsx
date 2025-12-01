@@ -26,15 +26,21 @@ export default function ScoreGrid({ scores, initialMonth, currentDate }: ScoreGr
     const days = eachDayOfInterval({ start: rangeStart, end: monthEnd });
 
     const getScoreColor = (score: number) => {
-        if (score === 0) return 'bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700';
-        if (score > 0) {
-            if (score >= 10) return 'bg-green-600 dark:bg-green-500 border border-green-700 dark:border-green-600';
-            if (score >= 5) return 'bg-green-500 dark:bg-green-400 border border-green-600 dark:border-green-500';
+        // 5 levels: Red (< -2), Orange (-2 to 0), Gray (0), Light Green (0 to 3), Green (>= 3)
+        if (score === 0) {
+            return 'bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700';
+        } else if (score >= 3) {
+            // Level 5: Green (positive, >= 3)
+            return 'bg-green-500 dark:bg-green-600 border border-green-600 dark:border-green-700';
+        } else if (score > 0) {
+            // Level 4: Light Green (slightly positive, 0 to 3)
             return 'bg-green-300 dark:bg-green-800 border border-green-400 dark:border-green-700';
+        } else if (score >= -2) {
+            // Level 2: Orange (slightly negative, -2 to 0)
+            return 'bg-orange-300 dark:bg-orange-800 border border-orange-400 dark:border-orange-700';
         } else {
-            if (score <= -10) return 'bg-red-600 dark:bg-red-500 border border-red-700 dark:border-red-600';
-            if (score <= -5) return 'bg-red-500 dark:bg-red-400 border border-red-600 dark:border-red-500';
-            return 'bg-red-300 dark:bg-red-800 border border-red-400 dark:border-red-700';
+            // Level 1: Red (negative, < -2)
+            return 'bg-red-500 dark:bg-red-600 border border-red-600 dark:border-red-700';
         }
     };
 
@@ -111,7 +117,7 @@ export default function ScoreGrid({ scores, initialMonth, currentDate }: ScoreGr
                                 "aspect-square rounded-md transition-all hover:scale-105 cursor-pointer flex items-center justify-center text-sm font-semibold",
                                 getScoreColor(score),
                                 isPreviousMonth && "opacity-30",
-                                score >= 5 || score <= -5 ? "text-white" : "text-gray-700 dark:text-gray-300",
+                                score >= 3 || score < -2 ? "text-white" : "text-gray-700 dark:text-gray-300",
                                 isSelected && "ring-4 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900 scale-105"
                             )}
                             title={`${format(day, 'MMM d')}: ${score > 0 ? '+' : ''}${score} pts`}
@@ -126,7 +132,9 @@ export default function ScoreGrid({ scores, initialMonth, currentDate }: ScoreGr
                 <span className="font-medium">Less</span>
                 <div className="flex gap-1.5">
                     <div className="w-4 h-4 rounded-sm bg-red-500 dark:bg-red-600 border border-red-600 dark:border-red-700" />
+                    <div className="w-4 h-4 rounded-sm bg-orange-300 dark:bg-orange-800 border border-orange-400 dark:border-orange-700" />
                     <div className="w-4 h-4 rounded-sm bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700" />
+                    <div className="w-4 h-4 rounded-sm bg-green-300 dark:bg-green-800 border border-green-400 dark:border-green-700" />
                     <div className="w-4 h-4 rounded-sm bg-green-500 dark:bg-green-600 border border-green-600 dark:border-green-700" />
                 </div>
                 <span className="font-medium">More</span>

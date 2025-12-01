@@ -27,16 +27,9 @@ export default function WeeklyChart({ scores }: WeeklyChartProps) {
             };
         });
 
-        // Calculate min and max for Y-axis scaling
-        const scoreValues = data.map(d => d.score);
-        const minScore = Math.min(...scoreValues, 0);
-        const maxScore = Math.max(...scoreValues, 0);
-
-        // Add padding to the range (10% on each side)
-        const range = maxScore - minScore;
-        const padding = range * 0.1 || 1; // At least 1 point padding
-        const yMin = minScore - padding;
-        const yMax = maxScore + padding;
+        // Fixed Y-axis range from -5 to 10
+        const yMin = -5;
+        const yMax = 10;
 
         return { data, yMin, yMax };
     }, [scores]);
@@ -117,6 +110,19 @@ export default function WeeklyChart({ scores }: WeeklyChartProps) {
                                 vectorEffect="non-scaling-stroke"
                             />
                         ))}
+
+                        {/* Zero line - more prominent */}
+                        <line
+                            x1="0"
+                            y1={getYPosition(0)}
+                            x2="100"
+                            y2={getYPosition(0)}
+                            stroke="currentColor"
+                            strokeWidth="1"
+                            className="text-gray-600 dark:text-gray-400"
+                            vectorEffect="non-scaling-stroke"
+                            strokeDasharray="4 2"
+                        />
 
                         {/* Area fill with gradient */}
                         <defs>
