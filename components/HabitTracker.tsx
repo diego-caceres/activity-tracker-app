@@ -141,7 +141,7 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
                             </span>
                             <button
                                 onClick={() => handleDeleteEvent(event.id, event.scoreSnapshot)}
-                                className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 p-1 transition-colors"
+                                className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 p-1 transition-colors cursor-pointer"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
@@ -155,14 +155,14 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
                 <div className="grid grid-cols-2 gap-0">
                     <button
                         onClick={() => setIsAdding(isAdding === 'healthy' ? null : 'healthy')}
-                        className="flex items-center justify-center gap-2 px-4 py-3 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors border-r border-gray-200 dark:border-gray-700"
+                        className="flex items-center justify-center gap-2 px-4 py-3 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors border-r border-gray-200 dark:border-gray-700 cursor-pointer"
                     >
                         <Plus className="w-5 h-5 flex-shrink-0" />
                         <span className="font-medium">Healthy</span>
                     </button>
                     <button
                         onClick={() => setIsAdding(isAdding === 'unhealthy' ? null : 'unhealthy')}
-                        className="flex items-center justify-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                        className="flex items-center justify-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors cursor-pointer"
                     >
                         <Plus className="w-5 h-5 flex-shrink-0" />
                         <span className="font-medium">Unhealthy</span>
@@ -191,7 +191,7 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
                                 key={habit.id}
                                 onClick={() => handleAddHabit(habit.id, habit.name, habit.type, habit.score, habit.icon)}
                                 className={cn(
-                                    "p-2 rounded-lg border text-left text-sm transition-colors flex flex-col gap-1 dark:bg-gray-700/50 dark:border-gray-600",
+                                    "p-2 rounded-lg border text-left text-sm transition-colors flex flex-col gap-1 dark:bg-gray-700/50 dark:border-gray-600 cursor-pointer",
                                     habit.type === 'healthy'
                                         ? "hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-200 dark:hover:border-green-800"
                                         : "hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800"

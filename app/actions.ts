@@ -31,6 +31,16 @@ export async function addTodo(date: string, title: string) {
     revalidatePath('/');
 }
 
+export async function updateTodo(date: string, id: string, title: string) {
+    const todos = await import('@/lib/data').then(m => m.getTodos(date));
+    const todo = todos.find((t) => t.id === id);
+    if (todo) {
+        todo.title = title;
+        await saveTodo(date, todo);
+    }
+    revalidatePath('/');
+}
+
 export async function deleteTodo(date: string, id: string) {
     await deleteTodoData(date, id);
     revalidatePath('/');
