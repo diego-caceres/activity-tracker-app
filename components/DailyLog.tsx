@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Todo, DailyNote } from '@/types';
 import { addTodo, deleteTodo, toggleTodo, saveNote } from '@/app/actions';
-import { Check, Trash2, Plus, Repeat, FileText } from 'lucide-react';
+import { Check, Trash2, Plus, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface DailyLogProps {
@@ -14,7 +14,6 @@ interface DailyLogProps {
 
 export default function DailyLog({ date, todos, note }: DailyLogProps) {
     const [newTodoTitle, setNewTodoTitle] = useState('');
-    const [isRecurring, setIsRecurring] = useState(false);
     const [noteContent, setNoteContent] = useState(note?.content || '');
     const [isSavingNote, setIsSavingNote] = useState(false);
 
@@ -22,9 +21,8 @@ export default function DailyLog({ date, todos, note }: DailyLogProps) {
         e.preventDefault();
         if (!newTodoTitle.trim()) return;
 
-        await addTodo(date, newTodoTitle, isRecurring);
+        await addTodo(date, newTodoTitle);
         setNewTodoTitle('');
-        setIsRecurring(false);
     };
 
     const handleSaveNote = async () => {
@@ -70,17 +68,6 @@ export default function DailyLog({ date, todos, note }: DailyLogProps) {
                         className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                     />
                     <button
-                        type="button"
-                        onClick={() => setIsRecurring(!isRecurring)}
-                        className={cn(
-                            "p-2 rounded-lg border transition-colors",
-                            isRecurring ? "bg-blue-100 border-blue-500 text-blue-700" : "bg-gray-50 border-gray-200 text-gray-500"
-                        )}
-                        title="Recurring daily"
-                    >
-                        <Repeat className="w-5 h-5" />
-                    </button>
-                    <button
                         type="submit"
                         className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
@@ -120,10 +107,6 @@ export default function DailyLog({ date, todos, note }: DailyLogProps) {
                                 )}>
                                     {todo.title}
                                 </span>
-
-                                {todo.isRecurring && (
-                                    <Repeat className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                                )}
                             </div>
 
                             <button
