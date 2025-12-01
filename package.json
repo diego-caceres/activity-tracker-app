@@ -10,9 +10,7 @@
   },
   "dependencies": {
     "@dsnp/parquetjs": "^1.8.7",
-    "@types/canvas-confetti": "^1.9.0",
     "@upstash/redis": "^1.35.7",
-    "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",

@@ -5,7 +5,6 @@ import {
     saveTodo,
     deleteTodo as deleteTodoData,
     toggleTodo as toggleTodoData,
-    addRecurringTodoTemplate,
     logHabitEvent,
     deleteHabitEvent as deleteHabitEventData,
     saveHabitDefinition,
@@ -19,22 +18,16 @@ import { checkRelevantGoals } from '@/lib/goalCalculations';
 
 // --- Todos ---
 
-export async function addTodo(date: string, title: string, isRecurring: boolean) {
+export async function addTodo(date: string, title: string) {
     const todo: Todo = {
         id: crypto.randomUUID(),
         title,
         status: 'pending',
         date,
-        isRecurring,
         createdAt: Date.now(),
     };
 
     await saveTodo(date, todo);
-
-    if (isRecurring) {
-        await addRecurringTodoTemplate(todo);
-    }
-
     revalidatePath('/');
 }
 

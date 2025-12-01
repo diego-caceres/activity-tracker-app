@@ -9,7 +9,6 @@ const key = {
     score: (date: string) => `score:day:${date}`,
     notes: (date: string) => `notes:day:${date}`,
     settingsHabits: 'settings:habits',
-    settingsRecurring: 'settings:recurring_todos',
     goals: 'goals:active',
     goalById: (id: string) => `goal:${id}`,
     goalProgress: (goalId: string, date: string) => `goal:${goalId}:progress:${date}`,
@@ -21,11 +20,29 @@ const key = {
 // --- Todos ---
 
 export async function getTodos(date: string): Promise<Todo[]> {
-    // First, ensure recurring todos exist for this date
-    await ensureRecurringTodos(date);
-
     const todos = await redis.get<Todo[]>(key.todos(date));
     return todos || [];
+}
+
+export async function getOverdueTodos(currentDate: string): Promise<Todo[]> {
+    // Look back up to 30 days for uncompleted todos
+    const start = subDays(parseISO(currentDate), 30);
+    const dates = eachDayOfInterval({
+        start,
+        end: subDays(parseISO(currentDate), 1) // Only previous days, not current
+    }).map((d) => format(d, 'yyyy-MM-dd'));
+
+    const overdueTodos: Todo[] = [];
+
+    for (const date of dates) {
+        const todos = await redis.get<Todo[]>(key.todos(date));
+        if (todos) {
+            const pending = todos.filter(t => t.status === 'pending');
+            overdueTodos.push(...pending);
+        }
+    }
+
+    return overdueTodos;
 }
 
 export async function saveTodo(date: string, todo: Todo): Promise<void> {
@@ -54,34 +71,6 @@ export async function toggleTodo(date: string, todoId: string, status: 'pending'
         todo.status = status;
         await redis.set(key.todos(date), todos);
     }
-}
-
-// Recurring Logic
-async function ensureRecurringTodos(date: string): Promise<void> {
-    // Check if we already initialized this date
-    const exists = await redis.exists(key.todos(date));
-    if (exists) return;
-
-    // Fetch recurring templates
-    const templates = await redis.get<Todo[]>(key.settingsRecurring);
-    if (!templates || templates.length === 0) return;
-
-    // Create instances for today
-    const newTodos = templates.map((t) => ({
-        ...t,
-        id: crypto.randomUUID(), // New ID for the instance
-        date,
-        status: 'pending' as const,
-        createdAt: Date.now(),
-    }));
-
-    await redis.set(key.todos(date), newTodos);
-}
-
-export async function addRecurringTodoTemplate(todo: Todo): Promise<void> {
-    const templates = (await redis.get<Todo[]>(key.settingsRecurring)) || [];
-    templates.push(todo);
-    await redis.set(key.settingsRecurring, templates);
 }
 
 // --- Habits ---

@@ -5,7 +5,6 @@ export interface Todo {
   title: string;
   status: TodoStatus;
   date: string; // YYYY-MM-DD
-  isRecurring: boolean;
   createdAt: number;
 }
 

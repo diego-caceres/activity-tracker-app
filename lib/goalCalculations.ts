@@ -11,7 +11,7 @@ import {
     getHealthyHabitCount,
     getActiveGoals,
 } from './data';
-import { format, parseISO, subDays, startOfWeek, startOfMonth } from 'date-fns';
+import { format, parseISO, subDays, startOfWeek, endOfWeek, startOfMonth } from 'date-fns';
 
 // Main progress calculation function
 export async function calculateGoalProgress(
@@ -47,15 +47,19 @@ export async function calculateGoalProgress(
 
         case 'habit_count':
             if (goal.habitId) {
-                // For weekly goals, calculate from start of current week
+                // For weekly goals, count ALL activities in the week (including future days)
                 const weekStart = format(
                     startOfWeek(parseISO(date), { weekStartsOn: 0 }),
+                    'yyyy-MM-dd'
+                );
+                const weekEnd = format(
+                    endOfWeek(parseISO(date), { weekStartsOn: 0 }),
                     'yyyy-MM-dd'
                 );
                 progress = await getHabitCountForPeriod(
                     goal.habitId,
                     weekStart,
-                    date
+                    weekEnd
                 );
             }
             break;
@@ -68,9 +72,18 @@ export async function calculateGoalProgress(
             break;
 
         case 'habit_frequency':
+            // For weekly goals, count ALL activities in the week (including future days)
+            const habitFreqWeekStart = format(
+                startOfWeek(parseISO(date), { weekStartsOn: 0 }),
+                'yyyy-MM-dd'
+            );
+            const habitFreqWeekEnd = format(
+                endOfWeek(parseISO(date), { weekStartsOn: 0 }),
+                'yyyy-MM-dd'
+            );
             progress = await getHealthyHabitCount(
-                goal.startDate,
-                date
+                habitFreqWeekStart,
+                habitFreqWeekEnd
             );
             break;
     }

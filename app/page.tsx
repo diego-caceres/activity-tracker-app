@@ -1,4 +1,4 @@
-import { getTodos, getHabitDefinitions, getHabitEvents, getDailyScore, getDailyScores, getDailyNote, calculateStreak, getActiveGoals, getAchievements } from '@/lib/data';
+import { getTodos, getOverdueTodos, getHabitDefinitions, getHabitEvents, getDailyScore, getDailyScores, getDailyNote, calculateStreak, getActiveGoals, getAchievements } from '@/lib/data';
 import { calculateGoalProgress } from '@/lib/goalCalculations';
 import TodoList from '@/components/TodoList';
 import DailyNotes from '@/components/DailyNotes';
@@ -22,8 +22,9 @@ export default async function Home({
   const date = dateParam || format(new Date(), 'yyyy-MM-dd');
 
   // Fetch data for the main view
-  const [todos, habitDefinitions, habitEvents, dailyScore, dailyNote, streak, goals, achievements] = await Promise.all([
+  const [todos, overdueTodos, habitDefinitions, habitEvents, dailyScore, dailyNote, streak, goals, achievements] = await Promise.all([
     getTodos(date),
+    getOverdueTodos(date),
     getHabitDefinitions(),
     getHabitEvents(date),
     getDailyScore(date),
@@ -72,7 +73,7 @@ export default async function Home({
 
         <ScoreGrid scores={calendarScores} currentDate={date} />
 
-        <TodoList date={date} todos={todos} />
+        <TodoList date={date} todos={todos} overdueTodos={overdueTodos} />
 
         <HabitTracker
           date={date}
