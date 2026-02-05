@@ -35,6 +35,13 @@ export interface DailyNote {
   updatedAt: number;
 }
 
+export interface WateringStatus {
+  date: string;
+  plants: boolean;
+  vegetables: boolean;
+  updatedAt: number;
+}
+
 // --- Goals ---
 
 export type GoalType =

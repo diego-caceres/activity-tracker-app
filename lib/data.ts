@@ -1,5 +1,5 @@
 import { redis } from './redis';
-import { Todo, HabitEvent, HabitDefinition, DailyScore, DailyNote, Goal, GoalProgress, GoalAchievement } from '@/types';
+import { Todo, HabitEvent, HabitDefinition, DailyScore, DailyNote, WateringStatus, Goal, GoalProgress, GoalAchievement } from '@/types';
 import { format, eachDayOfInterval, parseISO, subDays } from 'date-fns';
 
 // Keys
@@ -15,6 +15,7 @@ const key = {
     goalAchievements: 'goals:achievements',
     goalAchievementById: (id: string) => `goal:achievement:${id}`,
     goalsArchived: 'goals:archived',
+    watering: (date: string) => `watering:day:${date}`,
 };
 
 // --- Todos ---
@@ -155,6 +156,39 @@ export async function saveDailyNote(date: string, content: string): Promise<void
         updatedAt: Date.now(),
     };
     await redis.set(key.notes(date), note);
+}
+
+// --- Watering ---
+
+export async function getWateringStatus(date: string): Promise<WateringStatus | null> {
+    return await redis.get<WateringStatus>(key.watering(date));
+}
+
+export async function saveWateringStatus(date: string, plants: boolean, vegetables: boolean): Promise<void> {
+    const status: WateringStatus = {
+        date,
+        plants,
+        vegetables,
+        updatedAt: Date.now(),
+    };
+    await redis.set(key.watering(date), status);
+}
+
+export async function getWateringStatuses(startDate: string, endDate: string): Promise<WateringStatus[]> {
+    const start = parseISO(startDate);
+    const end = parseISO(endDate);
+
+    const dates = eachDayOfInterval({ start, end }).map((d) => format(d, 'yyyy-MM-dd'));
+
+    if (dates.length === 0) return [];
+
+    const pipeline = redis.pipeline();
+    dates.forEach((date) => pipeline.get(key.watering(date)));
+    const results = await pipeline.exec();
+
+    return results
+        .filter((r): r is WateringStatus => r !== null)
+        .map((r) => r as WateringStatus);
 }
 
 export async function calculateStreak(endDate: string): Promise<number> {

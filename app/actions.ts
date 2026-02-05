@@ -8,6 +8,8 @@ import {
     logHabitEvent,
     deleteHabitEvent as deleteHabitEventData,
     saveHabitDefinition,
+    getWateringStatus,
+    saveWateringStatus,
     saveGoal,
     updateGoalData,
     archiveGoalData,
@@ -146,4 +148,14 @@ export async function deleteGoal(goalId: string) {
     await deleteGoalData(goalId);
     revalidatePath('/');
     revalidatePath('/goals');
+}
+
+// --- Watering ---
+
+export async function toggleWatering(date: string, category: 'plants' | 'vegetables', value: boolean) {
+    const current = await getWateringStatus(date);
+    const plants = category === 'plants' ? value : (current?.plants ?? false);
+    const vegetables = category === 'vegetables' ? value : (current?.vegetables ?? false);
+    await saveWateringStatus(date, plants, vegetables);
+    revalidatePath('/');
 }

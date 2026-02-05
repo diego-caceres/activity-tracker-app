@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DailyScore } from '@/types';
+import { DailyScore, WateringStatus } from '@/types';
 import { format, parseISO, startOfMonth, endOfMonth, subDays, eachDayOfInterval, addMonths, subMonths, getDate, startOfWeek } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -9,11 +9,12 @@ import { useRouter } from 'next/navigation';
 
 interface ScoreGridProps {
     scores: DailyScore[];
+    wateringStatuses?: WateringStatus[];
     initialMonth?: string; // YYYY-MM format
     currentDate?: string; // YYYY-MM-DD format for highlighting
 }
 
-export default function ScoreGrid({ scores, initialMonth, currentDate }: ScoreGridProps) {
+export default function ScoreGrid({ scores, wateringStatuses, initialMonth, currentDate }: ScoreGridProps) {
     const router = useRouter();
     const [currentMonth, setCurrentMonth] = useState(() => {
         return initialMonth || format(new Date(), 'yyyy-MM');
@@ -108,13 +109,14 @@ export default function ScoreGrid({ scores, initialMonth, currentDate }: ScoreGr
                     const isPreviousMonth = format(day, 'yyyy-MM') !== currentMonth;
                     const dayNumber = getDate(day);
                     const isSelected = currentDate === dateStr;
+                    const watering = wateringStatuses?.find((w) => w.date === dateStr);
 
                     return (
                         <button
                             key={dateStr}
                             onClick={() => handleDayClick(dateStr)}
                             className={cn(
-                                "aspect-square rounded-md transition-all hover:scale-105 cursor-pointer flex items-center justify-center text-sm font-semibold",
+                                "relative aspect-square rounded-md transition-all hover:scale-105 cursor-pointer flex items-center justify-center text-sm font-semibold",
                                 getScoreColor(score),
                                 isPreviousMonth && "opacity-30",
                                 score >= 3 || score < -2 ? "text-white" : "text-gray-700 dark:text-gray-300",
@@ -123,21 +125,33 @@ export default function ScoreGrid({ scores, initialMonth, currentDate }: ScoreGr
                             title={`${format(day, 'MMM d')}: ${score > 0 ? '+' : ''}${score} pts`}
                         >
                             {dayNumber}
+                            {(watering?.plants || watering?.vegetables) && (
+                                <div className="absolute bottom-0.5 left-0 right-0 flex justify-center gap-0.5">
+                                    {watering.plants && <span className="text-[12px] leading-none">🪴</span>}
+                                    {watering.vegetables && <span className="text-[12px] leading-none">🥬</span>}
+                                </div>
+                            )}
                         </button>
                     );
                 })}
             </div>
 
-            <div className="flex items-center justify-end gap-3 text-sm text-gray-600 dark:text-gray-400 mt-4">
-                <span className="font-medium">Less</span>
-                <div className="flex gap-1.5">
-                    <div className="w-4 h-4 rounded-sm bg-red-500 dark:bg-red-600 border border-red-600 dark:border-red-700" />
-                    <div className="w-4 h-4 rounded-sm bg-orange-300 dark:bg-orange-800 border border-orange-400 dark:border-orange-700" />
-                    <div className="w-4 h-4 rounded-sm bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700" />
-                    <div className="w-4 h-4 rounded-sm bg-green-300 dark:bg-green-800 border border-green-400 dark:border-green-700" />
-                    <div className="w-4 h-4 rounded-sm bg-green-500 dark:bg-green-600 border border-green-600 dark:border-green-700" />
+            <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <span>🪴 Plants</span>
+                    <span>🥬 Vegetables</span>
                 </div>
-                <span className="font-medium">More</span>
+                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                    <span className="font-medium">Less</span>
+                    <div className="flex gap-1.5">
+                        <div className="w-4 h-4 rounded-sm bg-red-500 dark:bg-red-600 border border-red-600 dark:border-red-700" />
+                        <div className="w-4 h-4 rounded-sm bg-orange-300 dark:bg-orange-800 border border-orange-400 dark:border-orange-700" />
+                        <div className="w-4 h-4 rounded-sm bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700" />
+                        <div className="w-4 h-4 rounded-sm bg-green-300 dark:bg-green-800 border border-green-400 dark:border-green-700" />
+                        <div className="w-4 h-4 rounded-sm bg-green-500 dark:bg-green-600 border border-green-600 dark:border-green-700" />
+                    </div>
+                    <span className="font-medium">More</span>
+                </div>
             </div>
         </div>
     );

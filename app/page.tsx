@@ -1,4 +1,4 @@
-import { getTodos, getOverdueTodos, getHabitDefinitions, getHabitEvents, getDailyScore, getDailyScores, getDailyNote, calculateStreak, getActiveGoals, getAchievements } from '@/lib/data';
+import { getTodos, getOverdueTodos, getHabitDefinitions, getHabitEvents, getDailyScore, getDailyScores, getDailyNote, getWateringStatus, getWateringStatuses, calculateStreak, getActiveGoals, getAchievements } from '@/lib/data';
 import { calculateGoalProgress } from '@/lib/goalCalculations';
 import TodoList from '@/components/TodoList';
 import DailyNotes from '@/components/DailyNotes';
@@ -7,6 +7,7 @@ import WeeklyChart from '@/components/WeeklyChart';
 import ScoreGrid from '@/components/ScoreGrid';
 import DateNavigation from '@/components/DateNavigation';
 import StreakCounter from '@/components/StreakCounter';
+import WateringTracker from '@/components/WateringTracker';
 import GoalsSection from '@/components/GoalsSection';
 import AchievementBadge from '@/components/AchievementBadge';
 import { format, subDays, startOfMonth, subMonths } from 'date-fns';
@@ -22,13 +23,14 @@ export default async function Home({
   const date = dateParam || format(new Date(), 'yyyy-MM-dd');
 
   // Fetch data for the main view
-  const [todos, overdueTodos, habitDefinitions, habitEvents, dailyScore, dailyNote, streak, goals, achievements] = await Promise.all([
+  const [todos, overdueTodos, habitDefinitions, habitEvents, dailyScore, dailyNote, wateringStatus, streak, goals, achievements] = await Promise.all([
     getTodos(date),
     getOverdueTodos(date),
     getHabitDefinitions(),
     getHabitEvents(date),
     getDailyScore(date),
     getDailyNote(date),
+    getWateringStatus(date),
     calculateStreak(date),
     getActiveGoals(),
     getAchievements(),
@@ -39,7 +41,10 @@ export default async function Home({
   const today = new Date();
   const endDate = format(today, 'yyyy-MM-dd');
   const startDate = format(subMonths(startOfMonth(today), 1), 'yyyy-MM-dd'); // Start from previous month
-  const calendarScores = await getDailyScores(startDate, endDate);
+  const [calendarScores, calendarWatering] = await Promise.all([
+    getDailyScores(startDate, endDate),
+    getWateringStatuses(startDate, endDate),
+  ]);
 
   // Fetch data for weekly chart (last 7 days)
   const weeklyStart = format(subDays(today, 6), 'yyyy-MM-dd');
@@ -65,7 +70,7 @@ export default async function Home({
       <div className="flex-1 overflow-y-auto pb-20">
         <TodoList date={date} todos={todos} overdueTodos={overdueTodos} />
 
-        <ScoreGrid scores={calendarScores} currentDate={date} />
+        <ScoreGrid scores={calendarScores} wateringStatuses={calendarWatering} currentDate={date} />
 
         <HabitTracker
           date={date}
@@ -73,6 +78,8 @@ export default async function Home({
           events={habitEvents}
           dailyScore={dailyScore}
         />
+
+        <WateringTracker date={date} wateringStatus={wateringStatus} />
 
         <WeeklyChart scores={weeklyScores} />
 
