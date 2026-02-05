@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useOptimistic, startTransition } from 'react';
+import { useState, useOptimistic, startTransition, Fragment } from 'react';
 import { Todo } from '@/types';
 import { addTodo, updateTodo, deleteTodo, toggleTodo } from '@/app/actions';
 import { Check, Trash2, Plus } from 'lucide-react';
@@ -194,8 +194,8 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
                     const offset = isSwiping ? swipeOffset : 0;
 
                     return (
-                        <>
-                            <div key={todo.id} className="relative overflow-hidden group">
+                        <Fragment key={todo.id}>
+                            <div className="relative overflow-hidden group">
                                 {/* Delete button background (revealed on swipe) */}
                                 <button
                                     onClick={() => handleDeleteTodo(todo)}
@@ -283,7 +283,7 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
                                 </div>
                             </div>
                             {index < allTodos.length - 1 && <div className="border-t border-gray-100 dark:border-gray-800 ml-14" />}
-                        </>
+                        </Fragment>
                     );
                 })}
 
