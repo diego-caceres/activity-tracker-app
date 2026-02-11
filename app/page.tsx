@@ -1,4 +1,19 @@
-import { getTodos, getOverdueTodos, getHabitDefinitions, getHabitEvents, getDailyScore, getDailyScores, getDailyNote, getWateringStatus, getWateringStatuses, calculateStreak, getActiveGoals, getAchievements } from '@/lib/data';
+import {
+  getTodos,
+  getOverdueTodos,
+  getHabitDefinitions,
+  getHabitEvents,
+  getDailyScore,
+  getDailyScores,
+  getDailyNote,
+  getWateringStatus,
+  getWateringStatuses,
+  calculateStreak,
+  getActiveGoals,
+  getAchievements,
+  getWeightEntry,
+  getWeightEntries,
+} from '@/lib/data';
 import { calculateGoalProgress } from '@/lib/goalCalculations';
 import TodoList from '@/components/TodoList';
 import DailyNotes from '@/components/DailyNotes';
@@ -10,7 +25,11 @@ import StreakCounter from '@/components/StreakCounter';
 import WateringTracker from '@/components/WateringTracker';
 import GoalsSection from '@/components/GoalsSection';
 import AchievementBadge from '@/components/AchievementBadge';
-import { format, subDays, startOfMonth, subMonths } from 'date-fns';
+import LocalDateRedirect from '@/components/LocalDateRedirect';
+import TodayFocusCard from '@/components/TodayFocusCard';
+import MobileQuickBar from '@/components/MobileQuickBar';
+import WeightTracker from '@/components/WeightTracker';
+import { format, parseISO, subDays, startOfMonth, subMonths } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,10 +39,31 @@ export default async function Home({
   searchParams: Promise<{ date?: string }>;
 }) {
   const { date: dateParam } = await searchParams;
-  const date = dateParam || format(new Date(), 'yyyy-MM-dd');
+  if (!dateParam) {
+    return <LocalDateRedirect />;
+  }
+
+  const parsedDate = parseISO(dateParam);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return <LocalDateRedirect />;
+  }
+  const selectedDate = parsedDate;
+  const date = dateParam;
 
   // Fetch data for the main view
-  const [todos, overdueTodos, habitDefinitions, habitEvents, dailyScore, dailyNote, wateringStatus, streak, goals, achievements] = await Promise.all([
+  const [
+    todos,
+    overdueTodos,
+    habitDefinitions,
+    habitEvents,
+    dailyScore,
+    dailyNote,
+    wateringStatus,
+    streak,
+    goals,
+    achievements,
+    weightEntry,
+  ] = await Promise.all([
     getTodos(date),
     getOverdueTodos(date),
     getHabitDefinitions(),
@@ -34,6 +74,7 @@ export default async function Home({
     calculateStreak(date),
     getActiveGoals(),
     getAchievements(),
+    getWeightEntry(date),
   ]);
 
   // Fetch data for the calendar (current month + previous month for navigation)
@@ -46,9 +87,14 @@ export default async function Home({
     getWateringStatuses(startDate, endDate),
   ]);
 
-  // Fetch data for weekly chart (last 7 days)
-  const weeklyStart = format(subDays(today, 6), 'yyyy-MM-dd');
-  const weeklyScores = await getDailyScores(weeklyStart, endDate);
+  // Fetch data for weekly chart (last 7 days anchored to selected date)
+  const weeklyEnd = format(selectedDate, 'yyyy-MM-dd');
+  const weeklyStart = format(subDays(selectedDate, 6), 'yyyy-MM-dd');
+  const weeklyScores = await getDailyScores(weeklyStart, weeklyEnd);
+
+  // Fetch data for weight trend (last 30 days anchored to selected date)
+  const weightStart = format(subDays(selectedDate, 29), 'yyyy-MM-dd');
+  const weightEntries = await getWeightEntries(weightStart, weeklyEnd);
 
   // Calculate progress for all active goals
   const goalsProgress: Record<string, number> = {};
@@ -67,7 +113,14 @@ export default async function Home({
         <StreakCounter currentStreak={streak} />
       </div>
 
-      <div className="flex-1 overflow-y-auto pb-20">
+      <div className="flex-1 overflow-y-auto pb-8">
+        <TodayFocusCard
+          pendingTodos={todos.filter((todo) => todo.status === 'pending').length}
+          overdueTodos={overdueTodos.length}
+          dailyScore={dailyScore}
+          hasWeightEntry={Boolean(weightEntry)}
+        />
+
         <TodoList date={date} todos={todos} overdueTodos={overdueTodos} />
 
         <ScoreGrid scores={calendarScores} wateringStatuses={calendarWatering} currentDate={date} />
@@ -81,7 +134,9 @@ export default async function Home({
 
         <WateringTracker date={date} wateringStatus={wateringStatus} />
 
-        <WeeklyChart scores={weeklyScores} />
+        <WeeklyChart scores={weeklyScores} referenceDate={date} />
+
+        <WeightTracker date={date} entry={weightEntry} entries={weightEntries} />
 
         <div className="px-4 py-3">
           <GoalsSection
@@ -91,8 +146,10 @@ export default async function Home({
           />
         </div>
 
-        <DailyNotes date={date} note={dailyNote} />
+        <DailyNotes key={date} date={date} note={dailyNote} />
       </div>
+
+      <MobileQuickBar />
     </div>
   );
 }

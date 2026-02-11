@@ -3,7 +3,7 @@
 import { useState, useOptimistic, startTransition, Fragment } from 'react';
 import { Todo } from '@/types';
 import { addTodo, updateTodo, deleteTodo, toggleTodo } from '@/app/actions';
-import { Check, Trash2, Plus } from 'lucide-react';
+import { Check, Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 
@@ -26,6 +26,7 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
     const [swipingId, setSwipingId] = useState<string | null>(null);
     const [swipeOffset, setSwipeOffset] = useState(0);
     const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [showOverdue, setShowOverdue] = useState(false);
 
     const [optimisticTodos, updateOptimisticTodos] = useOptimistic(
         todos,
@@ -71,7 +72,9 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
         }
     );
 
-    const allTodos = [...optimisticOverdueTodos, ...optimisticTodos];
+    const todayTodos = optimisticTodos;
+    const overdueList = optimisticOverdueTodos;
+    const hasAnyTodos = todayTodos.length > 0 || overdueList.length > 0;
 
     const handleAddTodo = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -177,121 +180,146 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
         }
     };
 
+    const renderTodoItem = (todo: Todo, index: number, total: number) => {
+        const isOverdue = todo.date !== date;
+        const formattedDate = isOverdue ? format(parseISO(todo.date), 'MMM d') : null;
+        const isEditing = editingId === todo.id;
+        const isSwiping = swipingId === todo.id;
+        const offset = isSwiping ? swipeOffset : 0;
+
+        return (
+            <Fragment key={todo.id}>
+                <div className="relative overflow-hidden group">
+                    {/* Delete button background (revealed on swipe) */}
+                    <button
+                        onClick={() => handleDeleteTodo(todo)}
+                        className="absolute inset-0 bg-red-500 flex items-center justify-end pr-4"
+                    >
+                        <Trash2 className="w-5 h-5 text-white" />
+                    </button>
+
+                    {/* Main content */}
+                    <div
+                        className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all bg-white dark:bg-gray-900 relative"
+                        style={{
+                            transform: `translateX(-${offset}px)`,
+                            transition: touchStart === null ? 'transform 0.3s ease' : 'none'
+                        }}
+                        onTouchStart={(e) => handleTouchStart(e, todo.id)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                    >
+                        <button
+                            onClick={() => handleToggleTodo(todo)}
+                            className={cn(
+                                "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 mt-1",
+                                todo.status === 'done'
+                                    ? "bg-blue-500 border-blue-500"
+                                    : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
+                            )}
+                        >
+                            {todo.status === 'done' && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
+                        </button>
+
+                        <div className="flex-1 flex flex-col min-w-0">
+                            {isEditing ? (
+                                <textarea
+                                    value={editingText}
+                                    onChange={(e) => setEditingText(e.target.value)}
+                                    onBlur={() => handleSaveEdit(todo)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleSaveEdit(todo);
+                                        } else if (e.key === 'Escape') {
+                                            handleCancelEdit();
+                                        }
+                                    }}
+                                    autoFocus
+                                    rows={2}
+                                    className="w-full px-2 py-1 text-sm rounded border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none"
+                                />
+                            ) : (
+                                <button
+                                    onClick={() => handleStartEdit(todo)}
+                                    className="text-left w-full cursor-text hover:opacity-80 transition-opacity"
+                                >
+                                    <div
+                                        className={cn(
+                                            "text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words",
+                                            todo.status === 'done' && "line-through text-gray-400 dark:text-gray-500"
+                                        )}
+                                        style={{
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden'
+                                        }}
+                                    >
+                                        {todo.title}
+                                    </div>
+                                </button>
+                            )}
+                            {isOverdue && !isEditing && (
+                                <span className="text-xs text-orange-500 dark:text-orange-400 opacity-75 mt-1">
+                                    {formattedDate}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Delete button - hidden by default, visible on hover (desktop) */}
+                        <button
+                            onClick={() => handleDeleteTodo(todo)}
+                            className="text-gray-400 hover:text-red-500 p-1 transition-all mt-1 opacity-0 group-hover:opacity-100 cursor-pointer"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+                {index < total - 1 && <div className="border-t border-gray-100 dark:border-gray-800 ml-14" />}
+            </Fragment>
+        );
+    };
+
     return (
-        <div className="p-4 space-y-3">
+        <div id="todos-section" className="p-4 space-y-3">
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Todos</h2>
 
             <div className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-800">
-                {allTodos.length === 0 && (
+                {!hasAnyTodos && (
                     <div className="p-4 text-gray-500 dark:text-gray-400 text-center">No todos for this day.</div>
                 )}
 
-                {allTodos.map((todo, index) => {
-                    const isOverdue = todo.date !== date;
-                    const formattedDate = isOverdue ? format(parseISO(todo.date), 'MMM d') : null;
-                    const isEditing = editingId === todo.id;
-                    const isSwiping = swipingId === todo.id;
-                    const offset = isSwiping ? swipeOffset : 0;
+                {overdueList.length > 0 && (
+                    <div className="border-b border-gray-200 dark:border-gray-800">
+                        <button
+                            onClick={() => setShowOverdue(!showOverdue)}
+                            className="w-full flex items-center justify-between px-4 py-3 bg-amber-50/70 dark:bg-amber-950/20 text-left"
+                        >
+                            <span className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                                Overdue ({overdueList.length})
+                            </span>
+                            {showOverdue
+                                ? <ChevronUp className="w-4 h-4 text-amber-700 dark:text-amber-300" />
+                                : <ChevronDown className="w-4 h-4 text-amber-700 dark:text-amber-300" />}
+                        </button>
+                    </div>
+                )}
 
-                    return (
-                        <Fragment key={todo.id}>
-                            <div className="relative overflow-hidden group">
-                                {/* Delete button background (revealed on swipe) */}
-                                <button
-                                    onClick={() => handleDeleteTodo(todo)}
-                                    className="absolute inset-0 bg-red-500 flex items-center justify-end pr-4"
-                                >
-                                    <Trash2 className="w-5 h-5 text-white" />
-                                </button>
+                {showOverdue && overdueList.map((todo, index) => renderTodoItem(todo, index, overdueList.length))}
 
-                                {/* Main content */}
-                                <div
-                                    className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all bg-white dark:bg-gray-900 relative"
-                                    style={{
-                                        transform: `translateX(-${offset}px)`,
-                                        transition: touchStart === null ? 'transform 0.3s ease' : 'none'
-                                    }}
-                                    onTouchStart={(e) => handleTouchStart(e, todo.id)}
-                                    onTouchMove={handleTouchMove}
-                                    onTouchEnd={handleTouchEnd}
-                                >
-                                    <button
-                                        onClick={() => handleToggleTodo(todo)}
-                                        className={cn(
-                                            "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 mt-1",
-                                            todo.status === 'done'
-                                                ? "bg-blue-500 border-blue-500"
-                                                : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
-                                        )}
-                                    >
-                                        {todo.status === 'done' && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
-                                    </button>
+                {showOverdue && overdueList.length > 0 && todayTodos.length > 0 && (
+                    <div className="border-t border-gray-200 dark:border-gray-800" />
+                )}
 
-                                    <div className="flex-1 flex flex-col min-w-0">
-                                        {isEditing ? (
-                                            <textarea
-                                                value={editingText}
-                                                onChange={(e) => setEditingText(e.target.value)}
-                                                onBlur={() => handleSaveEdit(todo)}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                                        e.preventDefault();
-                                                        handleSaveEdit(todo);
-                                                    } else if (e.key === 'Escape') {
-                                                        handleCancelEdit();
-                                                    }
-                                                }}
-                                                autoFocus
-                                                rows={2}
-                                                className="w-full px-2 py-1 text-sm rounded border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none"
-                                            />
-                                        ) : (
-                                            <button
-                                                onClick={() => handleStartEdit(todo)}
-                                                className="text-left w-full cursor-text hover:opacity-80 transition-opacity"
-                                            >
-                                                <div
-                                                    className={cn(
-                                                        "text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words",
-                                                        todo.status === 'done' && "line-through text-gray-400 dark:text-gray-500"
-                                                    )}
-                                                    style={{
-                                                        display: '-webkit-box',
-                                                        WebkitLineClamp: 2,
-                                                        WebkitBoxOrient: 'vertical',
-                                                        overflow: 'hidden'
-                                                    }}
-                                                >
-                                                    {todo.title}
-                                                </div>
-                                            </button>
-                                        )}
-                                        {isOverdue && !isEditing && (
-                                            <span className="text-xs text-orange-500 dark:text-orange-400 opacity-75 mt-1">
-                                                {formattedDate}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {/* Delete button - hidden by default, visible on hover (desktop) */}
-                                    <button
-                                        onClick={() => handleDeleteTodo(todo)}
-                                        className="text-gray-400 hover:text-red-500 p-1 transition-all mt-1 opacity-0 group-hover:opacity-100 cursor-pointer"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                            {index < allTodos.length - 1 && <div className="border-t border-gray-100 dark:border-gray-800 ml-14" />}
-                        </Fragment>
-                    );
-                })}
+                {todayTodos.length > 0 && todayTodos.map((todo, index) => renderTodoItem(todo, index, todayTodos.length))}
 
                 {/* Add Todo Input at the bottom */}
-                {allTodos.length > 0 && <div className="border-t border-gray-200 dark:border-gray-800" />}
+                {hasAnyTodos && <div className="border-t border-gray-200 dark:border-gray-800" />}
                 <form onSubmit={handleAddTodo} className="flex items-start gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800">
                     <Plus className="w-5 h-5 text-blue-500 flex-shrink-0 mt-1" />
                     <textarea
+                        id="todo-add-input"
                         value={newTodoTitle}
                         onChange={(e) => setNewTodoTitle(e.target.value)}
                         onKeyDown={(e) => {
@@ -300,10 +328,16 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
                                 handleAddTodo(e);
                             }
                         }}
-                        placeholder="New Todo (Shift+Enter for new line)"
+                        placeholder="Add a todo..."
                         rows={2}
                         className="flex-1 bg-transparent focus:outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none"
                     />
+                    <button
+                        type="submit"
+                        className="px-3 py-1.5 mt-0.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
+                    >
+                        Add
+                    </button>
                 </form>
             </div>
         </div>

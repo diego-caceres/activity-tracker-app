@@ -1,19 +1,22 @@
 'use client';
 
 import { DailyScore } from '@/types';
-import { format, parseISO, subDays } from 'date-fns';
+import { format, isValid, parseISO, subDays } from 'date-fns';
 import { useMemo } from 'react';
 
 interface WeeklyChartProps {
     scores: DailyScore[];
+    referenceDate: string;
 }
 
-export default function WeeklyChart({ scores }: WeeklyChartProps) {
+export default function WeeklyChart({ scores, referenceDate }: WeeklyChartProps) {
     const chartData = useMemo(() => {
-        // Generate the last 7 days
-        const today = new Date();
+        const parsedReference = parseISO(referenceDate);
+        const anchorDate = isValid(parsedReference) ? parsedReference : new Date();
+
+        // Generate the last 7 days anchored to selected date
         const last7Days = Array.from({ length: 7 }, (_, i) => {
-            const date = subDays(today, 6 - i);
+            const date = subDays(anchorDate, 6 - i);
             return format(date, 'yyyy-MM-dd');
         });
 
@@ -32,13 +35,12 @@ export default function WeeklyChart({ scores }: WeeklyChartProps) {
         const yMax = 10;
 
         return { data, yMin, yMax };
-    }, [scores]);
+    }, [scores, referenceDate]);
 
     const { data, yMin, yMax } = chartData;
 
     // Chart dimensions
     const chartHeight = 200;
-    const chartWidth = 100; // percentage
     const padding = { top: 20, right: 20, bottom: 40, left: 50 };
 
     // Calculate Y position for a score
@@ -68,7 +70,7 @@ export default function WeeklyChart({ scores }: WeeklyChartProps) {
     const areaPath = `${linePath} L ${getXPosition(data.length - 1)} ${chartHeight} L 0 ${chartHeight} Z`;
 
     // Y-axis ticks
-    const yTicks = useMemo(() => {
+    const yTicks = (() => {
         const tickCount = 5;
         const range = yMax - yMin;
         const step = range / (tickCount - 1);
@@ -79,7 +81,7 @@ export default function WeeklyChart({ scores }: WeeklyChartProps) {
                 y: getYPosition(yMin + (step * i)),
             };
         });
-    }, [yMin, yMax]);
+    })();
 
     return (
         <div className="p-4 border-t bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
@@ -186,7 +188,7 @@ export default function WeeklyChart({ scores }: WeeklyChartProps) {
 
                 {/* X-axis labels */}
                 <div className="flex justify-between mt-2" style={{ marginLeft: -padding.left / 2, marginRight: -padding.right / 2 }}>
-                    {data.map((point, index) => (
+                    {data.map((point) => (
                         <div
                             key={point.date}
                             className="text-xs text-gray-600 dark:text-gray-400 text-center flex-1"

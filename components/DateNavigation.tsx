@@ -1,7 +1,7 @@
 'use client';
 
-import { format, addDays, subDays, parseISO } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { format, addDays, subDays, parseISO, isValid } from 'date-fns';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,12 @@ export default function DateNavigation() {
     const searchParams = useSearchParams();
     const dateParam = searchParams.get('date');
 
-    const currentDate = dateParam ? parseISO(dateParam) : new Date();
+    const localTodayStr = format(new Date(), 'yyyy-MM-dd');
+    const parsedDate = dateParam ? parseISO(dateParam) : parseISO(localTodayStr);
+    const currentDate = isValid(parsedDate) ? parsedDate : parseISO(localTodayStr);
+    const currentDateStr = format(currentDate, 'yyyy-MM-dd');
+    const isAtToday = currentDateStr >= localTodayStr;
+    const isToday = currentDateStr === localTodayStr;
 
     const handlePrev = () => {
         const newDate = subDays(currentDate, 1);
@@ -19,12 +24,13 @@ export default function DateNavigation() {
     };
 
     const handleNext = () => {
+        if (isAtToday) return;
         const newDate = addDays(currentDate, 1);
         router.push(`?date=${format(newDate, 'yyyy-MM-dd')}`);
     };
 
     const handleToday = () => {
-        router.push('/');
+        router.push(`/?date=${localTodayStr}`);
     };
 
     return (
@@ -38,13 +44,22 @@ export default function DateNavigation() {
             <div className="flex flex-col items-center">
                 <span className="font-bold text-lg text-gray-900 dark:text-gray-100">{format(currentDate, 'EEEE, MMM d')}</span>
                 <span className="text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200" onClick={handleToday}>
-                    {dateParam ? 'Go to Today' : 'Today'}
+                    {isToday ? 'Today' : 'Go to Today'}
                 </span>
             </div>
 
             <div className="flex items-center gap-2">
-                <button onClick={handleNext} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
-                    <ChevronRight className="w-6 h-6 text-gray-900 dark:text-gray-100" />
+                <button
+                    onClick={handleNext}
+                    disabled={isAtToday}
+                    className={cn(
+                        "p-2 rounded-full transition-colors text-gray-900 dark:text-gray-100",
+                        isAtToday
+                            ? "text-gray-300 dark:text-gray-700 cursor-not-allowed"
+                            : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                    )}
+                >
+                    <ChevronRight className="w-6 h-6" />
                 </button>
                 <ThemeToggle />
             </div>

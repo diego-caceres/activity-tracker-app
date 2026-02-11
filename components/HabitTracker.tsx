@@ -66,7 +66,7 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
             id: crypto.randomUUID(),
             habitId,
             date,
-            timestamp: Date.now(),
+            timestamp: 0,
             scoreSnapshot: score,
         };
 
@@ -105,7 +105,7 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
     };
 
     return (
-        <div className="p-4 space-y-3 border-t bg-gray-50/50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800">
+        <div id="habits-section" className="p-4 space-y-3 border-t bg-gray-50/50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
                     <Activity className="w-5 h-5 text-gray-700 dark:text-gray-300" />
@@ -154,6 +154,7 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
                 {optimisticState.events.length > 0 && <div className="border-t border-gray-200 dark:border-gray-700" />}
                 <div className="grid grid-cols-2 gap-0">
                     <button
+                        id="habit-quick-healthy"
                         onClick={() => setIsAdding(isAdding === 'healthy' ? null : 'healthy')}
                         className="flex items-center justify-center gap-2 px-4 py-3 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors border-r border-gray-200 dark:border-gray-700 cursor-pointer"
                     >

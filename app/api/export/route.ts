@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ParquetSchema, ParquetWriter } from '@dsnp/parquetjs';
-import { getTodos, getHabitEvents, getDailyScore } from '@/lib/data';
+import { getTodos, getHabitEvents, getDailyScore, getWeightEntry } from '@/lib/data';
 import { format } from 'date-fns';
 import fs from 'fs';
 import path from 'path';
@@ -10,10 +10,11 @@ export async function GET(request: NextRequest) {
     const date = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd');
 
     try {
-        const [todos, habits, score] = await Promise.all([
+        const [todos, habits, score, weightEntry] = await Promise.all([
             getTodos(date),
             getHabitEvents(date),
             getDailyScore(date),
+            getWeightEntry(date),
         ]);
 
         const schema = new ParquetSchema({
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest) {
             todos: { type: 'UTF8' },
             habits: { type: 'UTF8' },
             score: { type: 'INT32' },
+            weight: { type: 'DOUBLE', optional: true },
             timestamp: { type: 'INT64' },
         });
 
@@ -34,6 +36,7 @@ export async function GET(request: NextRequest) {
             todos: JSON.stringify(todos),
             habits: JSON.stringify(habits),
             score,
+            weight: weightEntry?.weight ?? null,
             timestamp: Date.now(),
         });
 

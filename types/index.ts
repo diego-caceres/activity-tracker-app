@@ -42,6 +42,12 @@ export interface WateringStatus {
   updatedAt: number;
 }
 
+export interface WeightEntry {
+  date: string;
+  weight: number;
+  updatedAt: number;
+}
+
 // --- Goals ---
 
 export type GoalType =

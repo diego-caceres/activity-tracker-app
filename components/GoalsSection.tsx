@@ -21,7 +21,7 @@ export default function GoalsSection({
     maxDisplay = 3
 }: GoalsSectionProps) {
     const [showForm, setShowForm] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     const displayedGoals = goals.slice(0, maxDisplay);
     const hasMoreGoals = goals.length > maxDisplay;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { DailyScore, WateringStatus } from '@/types';
-import { format, parseISO, startOfMonth, endOfMonth, subDays, eachDayOfInterval, addMonths, subMonths, getDate, startOfWeek } from 'date-fns';
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, getDate, startOfWeek } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -60,6 +60,7 @@ export default function ScoreGrid({ scores, wateringStatuses, initialMonth, curr
     };
 
     const isCurrentMonth = currentMonth === format(new Date(), 'yyyy-MM');
+    const localToday = format(new Date(), 'yyyy-MM-dd');
 
     // Day of week labels (S, M, T, W, T, F, S) - Sunday first
     const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -107,6 +108,7 @@ export default function ScoreGrid({ scores, wateringStatuses, initialMonth, curr
                     const scoreData = scores.find((s) => s.date === dateStr);
                     const score = scoreData ? scoreData.score : 0;
                     const isPreviousMonth = format(day, 'yyyy-MM') !== currentMonth;
+                    const isFutureDay = dateStr > localToday;
                     const dayNumber = getDate(day);
                     const isSelected = currentDate === dateStr;
                     const watering = wateringStatuses?.find((w) => w.date === dateStr);
@@ -115,14 +117,18 @@ export default function ScoreGrid({ scores, wateringStatuses, initialMonth, curr
                         <button
                             key={dateStr}
                             onClick={() => handleDayClick(dateStr)}
+                            disabled={isFutureDay}
                             className={cn(
                                 "relative aspect-square rounded-md transition-all hover:scale-105 cursor-pointer flex items-center justify-center text-sm font-semibold",
                                 getScoreColor(score),
                                 isPreviousMonth && "opacity-30",
+                                isFutureDay && "opacity-40 cursor-not-allowed hover:scale-100",
                                 score >= 3 || score < -2 ? "text-white" : "text-gray-700 dark:text-gray-300",
                                 isSelected && "ring-4 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900 scale-105"
                             )}
-                            title={`${format(day, 'MMM d')}: ${score > 0 ? '+' : ''}${score} pts`}
+                            title={isFutureDay
+                                ? `${format(day, 'MMM d')} (future day)`
+                                : `${format(day, 'MMM d')}: ${score > 0 ? '+' : ''}${score} pts`}
                         >
                             {dayNumber}
                             {(watering?.plants || watering?.vegetables) && (

@@ -14,6 +14,7 @@ import {
     updateGoalData,
     archiveGoalData,
     deleteGoalData,
+    saveWeightEntry,
 } from '@/lib/data';
 import { Todo, HabitEvent, HabitDefinition, Goal, GoalType, GoalPeriod } from '@/types';
 import { checkRelevantGoals } from '@/lib/goalCalculations';
@@ -157,5 +158,12 @@ export async function toggleWatering(date: string, category: 'plants' | 'vegetab
     const plants = category === 'plants' ? value : (current?.plants ?? false);
     const vegetables = category === 'vegetables' ? value : (current?.vegetables ?? false);
     await saveWateringStatus(date, plants, vegetables);
+    revalidatePath('/');
+}
+
+// --- Weight ---
+
+export async function saveWeight(date: string, weight: number) {
+    await saveWeightEntry(date, weight);
     revalidatePath('/');
 }
