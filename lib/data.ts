@@ -1,5 +1,5 @@
 import { redis } from './redis';
-import { Todo, HabitEvent, HabitDefinition, DailyScore, DailyNote, WateringStatus, WeightEntry, Goal, GoalProgress, GoalAchievement } from '@/types';
+import { Todo, HabitEvent, HabitDefinition, DailyScore, DailyNote, WateringStatus, WeightEntry, Goal, GoalProgress, GoalAchievement, UptimeProject, UptimeDailyCheck } from '@/types';
 import { format, eachDayOfInterval, parseISO, subDays } from 'date-fns';
 
 // Keys
@@ -18,6 +18,8 @@ const key = {
     watering: (date: string) => `watering:day:${date}`,
     weight: (date: string) => `weight:day:${date}`,
     habitLastUsed: 'settings:habit_last_used',
+    uptimeProjects: 'settings:uptime_projects',
+    uptimeDaily: (date: string) => `uptime:day:${date}`,
 };
 
 // --- Todos ---
@@ -461,6 +463,53 @@ export async function getTodoCompletionRate(
     }
 
     return totalTodos === 0 ? 0 : (completedTodos / totalTodos) * 100;
+}
+
+// --- Uptime ---
+
+export async function getUptimeProjects(): Promise<UptimeProject[]> {
+    return (await redis.get<UptimeProject[]>(key.uptimeProjects)) || [];
+}
+
+export async function saveUptimeProject(project: UptimeProject): Promise<void> {
+    const projects = await getUptimeProjects();
+    const existingIndex = projects.findIndex((p) => p.id === project.id);
+    if (existingIndex >= 0) {
+        projects[existingIndex] = project;
+    } else {
+        projects.push(project);
+    }
+    await redis.set(key.uptimeProjects, projects);
+}
+
+export async function deleteUptimeProject(projectId: string): Promise<void> {
+    const projects = await getUptimeProjects();
+    const newProjects = projects.filter((p) => p.id !== projectId);
+    await redis.set(key.uptimeProjects, newProjects);
+}
+
+export async function getUptimeDailyCheck(date: string): Promise<UptimeDailyCheck | null> {
+    return await redis.get<UptimeDailyCheck>(key.uptimeDaily(date));
+}
+
+export async function saveUptimeDailyCheck(date: string, check: UptimeDailyCheck): Promise<void> {
+    await redis.set(key.uptimeDaily(date), check);
+}
+
+export async function getUptimeHistory(startDate: string, endDate: string): Promise<UptimeDailyCheck[]> {
+    const start = parseISO(startDate);
+    const end = parseISO(endDate);
+    const dates = eachDayOfInterval({ start, end }).map((d) => format(d, 'yyyy-MM-dd'));
+
+    if (dates.length === 0) return [];
+
+    const pipeline = redis.pipeline();
+    dates.forEach((date) => pipeline.get(key.uptimeDaily(date)));
+    const results = await pipeline.exec();
+
+    return results
+        .filter((r): r is UptimeDailyCheck => r !== null)
+        .map((r) => r as UptimeDailyCheck);
 }
 
 // Helper: Get healthy habit count

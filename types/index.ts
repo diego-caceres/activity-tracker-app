@@ -94,3 +94,31 @@ export interface GoalAchievement {
   finalProgress: number;
   goalSnapshot: Goal;
 }
+
+// --- Uptime ---
+
+export type UptimeStatus = 'up' | 'down' | 'unknown';
+
+export interface UptimeProject {
+  id: string;
+  name: string;
+  url: string;
+  description?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface UptimeCheckResult {
+  projectId: string;
+  status: UptimeStatus;
+  responseTimeMs: number | null;
+  statusCode: number | null;
+  checkedAt: number;
+  error?: string;
+}
+
+export interface UptimeDailyCheck {
+  date: string;
+  results: UptimeCheckResult[];
+  checkedAt: number;
+}

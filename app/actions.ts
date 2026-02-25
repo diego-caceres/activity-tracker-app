@@ -16,8 +16,11 @@ import {
     deleteGoalData,
     saveWeightEntry,
     updateHabitLastUsed,
+    saveUptimeProject,
+    deleteUptimeProject as deleteUptimeProjectData,
+    getUptimeProjects,
 } from '@/lib/data';
-import { Todo, HabitEvent, HabitDefinition, Goal, GoalType, GoalPeriod } from '@/types';
+import { Todo, HabitEvent, HabitDefinition, Goal, GoalType, GoalPeriod, UptimeProject } from '@/types';
 import { checkRelevantGoals } from '@/lib/goalCalculations';
 
 // --- Todos ---
@@ -168,4 +171,52 @@ export async function toggleWatering(date: string, category: 'plants' | 'vegetab
 export async function saveWeight(date: string, weight: number) {
     await saveWeightEntry(date, weight);
     revalidatePath('/');
+}
+
+// --- Uptime ---
+
+export async function addUptimeProject(name: string, url: string, description?: string) {
+    const project: UptimeProject = {
+        id: crypto.randomUUID(),
+        name,
+        url,
+        description,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+    };
+
+    await saveUptimeProject(project);
+    revalidatePath('/');
+    revalidatePath('/uptime');
+}
+
+export async function updateUptimeProject(id: string, name: string, url: string, description?: string) {
+    const projects = await getUptimeProjects();
+    const existing = projects.find((p) => p.id === id);
+    if (!existing) return;
+
+    const updated: UptimeProject = {
+        ...existing,
+        name,
+        url,
+        description,
+        updatedAt: Date.now(),
+    };
+
+    await saveUptimeProject(updated);
+    revalidatePath('/');
+    revalidatePath('/uptime');
+}
+
+export async function removeUptimeProject(id: string) {
+    await deleteUptimeProjectData(id);
+    revalidatePath('/');
+    revalidatePath('/uptime');
+}
+
+export async function triggerUptimeCheck(date: string) {
+    const { runUptimeChecks } = await import('@/lib/uptimeCheck');
+    await runUptimeChecks(date);
+    revalidatePath('/');
+    revalidatePath('/uptime');
 }

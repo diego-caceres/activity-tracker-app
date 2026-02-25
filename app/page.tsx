@@ -14,6 +14,8 @@ import {
   getWeightEntry,
   getWeightEntries,
   getHabitLastUsed,
+  getUptimeProjects,
+  getUptimeDailyCheck,
 } from '@/lib/data';
 import { calculateGoalProgress } from '@/lib/goalCalculations';
 import TodoList from '@/components/TodoList';
@@ -30,6 +32,7 @@ import LocalDateRedirect from '@/components/LocalDateRedirect';
 import TodayFocusCard from '@/components/TodayFocusCard';
 import MobileQuickBar from '@/components/MobileQuickBar';
 import WeightTracker from '@/components/WeightTracker';
+import UptimeStatusCard from '@/components/UptimeStatusCard';
 import { format, parseISO, subDays, startOfMonth, subMonths } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
@@ -65,6 +68,8 @@ export default async function Home({
     achievements,
     weightEntry,
     habitLastUsed,
+    uptimeProjects,
+    uptimeDailyCheck,
   ] = await Promise.all([
     getTodos(date),
     getOverdueTodos(date),
@@ -78,6 +83,8 @@ export default async function Home({
     getAchievements(),
     getWeightEntry(date),
     getHabitLastUsed(),
+    getUptimeProjects(),
+    getUptimeDailyCheck(date),
   ]);
 
   // Fetch data for the calendar (current month + previous month for navigation)
@@ -149,6 +156,12 @@ export default async function Home({
             currentDate={date}
           />
         </div>
+
+        <UptimeStatusCard
+          projects={uptimeProjects}
+          dailyCheck={uptimeDailyCheck}
+          currentDate={date}
+        />
 
         <DailyNotes key={date} date={date} note={dailyNote} />
       </div>
