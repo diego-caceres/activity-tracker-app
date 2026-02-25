@@ -178,7 +178,7 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
     const handleSaveWeight = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        const parsed = Number.parseFloat(weightInput);
+        const parsed = Number.parseFloat(weightInput.replace(',', '.'));
         if (!Number.isFinite(parsed)) {
             setFeedback('Enter a valid number.');
             return;
@@ -233,11 +233,15 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
                 <div className="flex gap-2">
                     <input
                         id="weight-input"
-                        type="number"
+                        type="text"
                         inputMode="decimal"
-                        step="0.1"
                         value={weightInput}
-                        onChange={(e) => setWeightInput(e.target.value)}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === '' || /^[0-9]*[.,]?[0-9]*$/.test(val)) {
+                                setWeightInput(val);
+                            }
+                        }}
                         placeholder="e.g. 178.4"
                         className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
