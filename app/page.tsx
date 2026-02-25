@@ -129,6 +129,8 @@ export default async function Home({
           overdueTodos={overdueTodos.length}
           dailyScore={dailyScore}
           hasWeightEntry={Boolean(weightEntry)}
+          uptimeUp={uptimeDailyCheck?.results.filter((r) => r.status === 'up').length ?? 0}
+          uptimeTotal={uptimeProjects.length}
         />
 
         <TodoList date={date} todos={todos} overdueTodos={overdueTodos} />

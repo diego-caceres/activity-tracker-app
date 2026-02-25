@@ -8,6 +8,8 @@ interface TodayFocusCardProps {
     overdueTodos: number;
     dailyScore: number;
     hasWeightEntry: boolean;
+    uptimeUp: number;
+    uptimeTotal: number;
 }
 
 function focusElement(id: string) {
@@ -32,9 +34,12 @@ export default function TodayFocusCard({
     overdueTodos,
     dailyScore,
     hasWeightEntry,
+    uptimeUp,
+    uptimeTotal,
 }: TodayFocusCardProps) {
-    const totalOpen = pendingTodos + overdueTodos;
     const scoreTone = dailyScore > 0 ? 'text-emerald-700 dark:text-emerald-300' : dailyScore < 0 ? 'text-red-700 dark:text-red-300' : 'text-slate-700 dark:text-slate-300';
+    const allUp = uptimeTotal > 0 && uptimeUp === uptimeTotal;
+    const uptimeTone = uptimeTotal === 0 ? 'text-gray-500 dark:text-gray-400' : allUp ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300';
 
     return (
         <div id="today-focus-section" className="p-4 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-b from-white to-emerald-50/30 dark:from-gray-900 dark:to-emerald-950/20">
@@ -45,17 +50,19 @@ export default function TodayFocusCard({
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
-                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5">
-                        <div className="text-gray-500 dark:text-gray-400">Open</div>
-                        <div className="font-semibold text-gray-900 dark:text-gray-100">{totalOpen}</div>
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-center">
+                        <div className="text-gray-500 dark:text-gray-400">Uptime</div>
+                        <div className={cn('font-semibold', uptimeTone)}>
+                            {uptimeTotal === 0 ? '—' : `${uptimeUp}/${uptimeTotal}`}
+                        </div>
                     </div>
-                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5">
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-center">
                         <div className="text-gray-500 dark:text-gray-400">Score</div>
                         <div className={cn('font-semibold', scoreTone)}>
                             {dailyScore > 0 ? '+' : ''}{dailyScore}
                         </div>
                     </div>
-                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5">
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-center">
                         <div className="text-gray-500 dark:text-gray-400">Weight</div>
                         <div className="font-semibold text-gray-900 dark:text-gray-100">{hasWeightEntry ? 'Logged' : 'Pending'}</div>
                     </div>
