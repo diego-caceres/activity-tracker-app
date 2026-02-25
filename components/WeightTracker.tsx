@@ -23,6 +23,7 @@ function formatWeight(value: number) {
 export default function WeightTracker({ date, entry, entries }: WeightTrackerProps) {
     const [weightInput, setWeightInput] = useState(entry ? formatWeight(entry.weight) : '');
     const [isSaving, setIsSaving] = useState(false);
+    const [selectedPoint, setSelectedPoint] = useState<string | null>(null);
     const [feedback, setFeedback] = useState<string | null>(null);
     const [localEntry, setLocalEntry] = useState<WeightEntry | null>(entry);
 
@@ -30,6 +31,7 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
         setWeightInput(entry ? formatWeight(entry.weight) : '');
         setLocalEntry(entry);
         setFeedback(null);
+        setSelectedPoint(null);
     }, [date, entry]);
 
     const anchorDate = useMemo(() => {
@@ -321,21 +323,43 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
                                 />
                             )}
 
-                            {chart.loggedPoints.map((point) => (
-                                <circle
-                                    key={point.date}
-                                    cx={point.x}
-                                    cy={point.y}
-                                    r="1.2"
-                                    fill="white"
-                                    stroke={trendTone === 'up' ? 'rgb(245, 158, 11)' : 'rgb(16, 185, 129)'}
-                                    strokeWidth="1"
-                                    vectorEffect="non-scaling-stroke"
-                                >
-                                    <title>{`${format(parseISO(point.date), 'MMM d')}: ${formatWeight(point.weight)}`}</title>
-                                </circle>
-                            ))}
                         </svg>
+
+                        <div className="absolute top-0 left-0 right-0" style={{ height: CHART_HEIGHT }} onClick={() => setSelectedPoint(null)}>
+                            {chart.loggedPoints.map((point) => {
+                                const isSelected = selectedPoint === point.date;
+                                const dotColor = trendTone === 'up' ? 'rgb(245, 158, 11)' : 'rgb(16, 185, 129)';
+                                return (
+                                    <div key={point.date}>
+                                        <button
+                                            type="button"
+                                            className="absolute -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 bg-white dark:bg-gray-900 cursor-pointer"
+                                            style={{
+                                                left: `${point.x}%`,
+                                                top: `${(point.y / CHART_HEIGHT) * 100}%`,
+                                                borderColor: dotColor,
+                                            }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedPoint(isSelected ? null : point.date);
+                                            }}
+                                        />
+                                        {isSelected && (
+                                            <div
+                                                className="absolute -translate-x-1/2 pointer-events-none z-10 px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 shadow-lg"
+                                                style={{
+                                                    left: `${point.x}%`,
+                                                    top: `${(point.y / CHART_HEIGHT) * 100}%`,
+                                                    marginTop: -28,
+                                                }}
+                                            >
+                                                {format(parseISO(point.date), 'MMM d')}: {formatWeight(point.weight)}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
 
                         <div className="absolute inset-y-0 left-0 flex flex-col justify-between pointer-events-none">
                             {chart.yTicks.slice().reverse().map((tick) => (
