@@ -15,6 +15,7 @@ import {
     archiveGoalData,
     deleteGoalData,
     saveWeightEntry,
+    updateHabitLastUsed,
 } from '@/lib/data';
 import { Todo, HabitEvent, HabitDefinition, Goal, GoalType, GoalPeriod } from '@/types';
 import { checkRelevantGoals } from '@/lib/goalCalculations';
@@ -67,6 +68,7 @@ export async function logHabit(date: string, habitId: string, score: number) {
     };
 
     await logHabitEvent(date, event);
+    await updateHabitLastUsed(habitId, event.timestamp);
     await checkRelevantGoals(date, 'habit');
     revalidatePath('/');
 }

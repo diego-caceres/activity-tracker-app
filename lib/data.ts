@@ -17,6 +17,7 @@ const key = {
     goalsArchived: 'goals:archived',
     watering: (date: string) => `watering:day:${date}`,
     weight: (date: string) => `weight:day:${date}`,
+    habitLastUsed: 'settings:habit_last_used',
 };
 
 // --- Todos ---
@@ -103,6 +104,18 @@ export async function logHabitEvent(date: string, event: HabitEvent): Promise<vo
 
     // Update score
     await updateDailyScore(date, event.scoreSnapshot);
+}
+
+export type HabitLastUsedMap = Record<string, number>;
+
+export async function getHabitLastUsed(): Promise<HabitLastUsedMap> {
+    return (await redis.get<HabitLastUsedMap>(key.habitLastUsed)) || {};
+}
+
+export async function updateHabitLastUsed(habitId: string, timestamp: number): Promise<void> {
+    const map = await getHabitLastUsed();
+    map[habitId] = timestamp;
+    await redis.set(key.habitLastUsed, map);
 }
 
 export async function deleteHabitEvent(date: string, eventId: string): Promise<void> {

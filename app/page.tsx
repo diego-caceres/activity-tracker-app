@@ -13,6 +13,7 @@ import {
   getAchievements,
   getWeightEntry,
   getWeightEntries,
+  getHabitLastUsed,
 } from '@/lib/data';
 import { calculateGoalProgress } from '@/lib/goalCalculations';
 import TodoList from '@/components/TodoList';
@@ -63,6 +64,7 @@ export default async function Home({
     goals,
     achievements,
     weightEntry,
+    habitLastUsed,
   ] = await Promise.all([
     getTodos(date),
     getOverdueTodos(date),
@@ -75,6 +77,7 @@ export default async function Home({
     getActiveGoals(),
     getAchievements(),
     getWeightEntry(date),
+    getHabitLastUsed(),
   ]);
 
   // Fetch data for the calendar (current month + previous month for navigation)
@@ -130,6 +133,7 @@ export default async function Home({
           definitions={habitDefinitions}
           events={habitEvents}
           dailyScore={dailyScore}
+          habitLastUsed={habitLastUsed}
         />
 
         <WateringTracker date={date} wateringStatus={wateringStatus} />

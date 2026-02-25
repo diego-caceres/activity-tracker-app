@@ -2,6 +2,7 @@
 
 import { useState, useOptimistic, startTransition } from 'react';
 import { HabitDefinition, HabitEvent } from '@/types';
+import { HabitLastUsedMap } from '@/lib/data';
 import { deleteHabitEvent, addHabitDefinition } from '@/app/actions';
 import { Plus, Activity, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,14 +13,23 @@ interface HabitTrackerProps {
     definitions: HabitDefinition[];
     events: HabitEvent[];
     dailyScore: number;
+    habitLastUsed: HabitLastUsedMap;
 }
 
 type HabitAction =
     | { type: 'add'; event: HabitEvent; definition: HabitDefinition }
     | { type: 'delete'; id: string };
 
-export default function HabitTracker({ date, definitions, events, dailyScore }: HabitTrackerProps) {
+export default function HabitTracker({ date, definitions, events, dailyScore, habitLastUsed }: HabitTrackerProps) {
     const [isAdding, setIsAdding] = useState<'healthy' | 'unhealthy' | null>(null);
+
+    const [optimisticLastUsed, updateOptimisticLastUsed] = useOptimistic(
+        habitLastUsed,
+        (state, update: { habitId: string; timestamp: number }) => ({
+            ...state,
+            [update.habitId]: update.timestamp,
+        })
+    );
 
     const [optimisticState, updateOptimisticState] = useOptimistic(
         { events, definitions },
@@ -45,6 +55,12 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
         dailyScore,
         (state: number, delta: number) => state + delta
     );
+
+    const sortedHabits = (type: 'healthy' | 'unhealthy') => {
+        return PREDEFINED_HABITS
+            .filter(habit => habit.type === type)
+            .sort((a, b) => (optimisticLastUsed[b.id] || 0) - (optimisticLastUsed[a.id] || 0));
+    };
 
     const getHabitName = (habitId: string) => {
         const definition = optimisticState.definitions.find(d => d.id === habitId);
@@ -90,6 +106,7 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
                 updateOptimisticState({ type: 'add', event: newEvent, definition: newDefinition });
             }
             updateOptimisticScore(score);
+            updateOptimisticLastUsed({ habitId, timestamp: Date.now() });
         });
 
         await addHabitDefinition(date, habitId, name, type, score, icon);
@@ -187,7 +204,7 @@ export default function HabitTracker({ date, definitions, events, dailyScore }: 
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-1">
-                        {PREDEFINED_HABITS.filter(habit => habit.type === isAdding).map((habit) => (
+                        {sortedHabits(isAdding).map((habit) => (
                             <button
                                 key={habit.id}
                                 onClick={() => handleAddHabit(habit.id, habit.name, habit.type, habit.score, habit.icon)}
