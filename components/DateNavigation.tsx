@@ -1,7 +1,7 @@
 'use client';
 
 import { format, addDays, subDays, parseISO, isValid } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -33,6 +33,11 @@ export default function DateNavigation() {
         router.push(`/?date=${localTodayStr}`);
     };
 
+    const handleLogout = async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        router.push('/login');
+    };
+
     return (
         <div className="flex items-center justify-between flex-1">
             <div className="flex items-center gap-2">
@@ -62,6 +67,13 @@ export default function DateNavigation() {
                     <ChevronRight className="w-6 h-6" />
                 </button>
                 <ThemeToggle />
+                <button
+                    onClick={handleLogout}
+                    className="p-2 hover:bg-rose-500/10 rounded-full transition-colors text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400"
+                    title="Lock app"
+                >
+                    <LogOut className="w-5 h-5" />
+                </button>
             </div>
         </div>
     );
