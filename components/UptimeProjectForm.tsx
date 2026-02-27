@@ -40,24 +40,24 @@ export default function UptimeProjectForm({ onClose, onSuccess, editProject }: U
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
             <div
-                className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+                className="bg-white dark:bg-[#1b1f2e] rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-white/[0.07]"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <div className="sticky top-0 bg-white dark:bg-[#1b1f2e] border-b border-slate-200 dark:border-white/[0.07] px-4 py-3 flex items-center justify-between rounded-t-2xl">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                         {editProject ? 'Edit Project' : 'Add Project'}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                        className="p-1 hover:bg-slate-100 dark:hover:bg-white/10 rounded transition-colors"
                     >
-                        <X className="w-5 h-5" />
+                        <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
                     <div>
-                        <label htmlFor="project-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label htmlFor="project-name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                             Project Name *
                         </label>
                         <input
@@ -67,12 +67,12 @@ export default function UptimeProjectForm({ onClose, onSuccess, editProject }: U
                             onChange={(e) => setName(e.target.value)}
                             placeholder="e.g., My Supabase App"
                             required
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-300 dark:border-white/[0.07] rounded-lg bg-white dark:bg-[#141720] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="project-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label htmlFor="project-url" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                             Health Check URL *
                         </label>
                         <input
@@ -82,12 +82,12 @@ export default function UptimeProjectForm({ onClose, onSuccess, editProject }: U
                             onChange={(e) => setUrl(e.target.value)}
                             placeholder="https://myapp.com/api/health"
                             required
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-300 dark:border-white/[0.07] rounded-lg bg-white dark:bg-[#141720] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="project-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label htmlFor="project-description" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                             Description (optional)
                         </label>
                         <textarea
@@ -96,7 +96,7 @@ export default function UptimeProjectForm({ onClose, onSuccess, editProject }: U
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Brief description of this project"
                             rows={2}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-300 dark:border-white/[0.07] rounded-lg bg-white dark:bg-[#141720] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                     </div>
 
@@ -104,14 +104,14 @@ export default function UptimeProjectForm({ onClose, onSuccess, editProject }: U
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            className="flex-1 px-4 py-2 border border-slate-300 dark:border-white/[0.07] rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isSubmitting ? 'Saving...' : editProject ? 'Update' : 'Add Project'}
                         </button>

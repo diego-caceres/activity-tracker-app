@@ -36,14 +36,14 @@ export default function DateNavigation() {
     return (
         <div className="flex items-center justify-between flex-1">
             <div className="flex items-center gap-2">
-                <button onClick={handlePrev} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
-                    <ChevronLeft className="w-6 h-6 text-gray-900 dark:text-gray-100" />
+                <button onClick={handlePrev} className="p-2 hover:bg-indigo-500/10 rounded-full transition-colors">
+                    <ChevronLeft className="w-6 h-6 text-slate-900 dark:text-slate-100" />
                 </button>
             </div>
 
             <div className="flex flex-col items-center">
-                <span className="font-bold text-lg text-gray-900 dark:text-gray-100">{format(currentDate, 'EEEE, MMM d')}</span>
-                <span className="text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200" onClick={handleToday}>
+                <span className="font-black text-lg text-slate-900 dark:text-slate-100">{format(currentDate, 'EEEE, MMM d')}</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 cursor-pointer hover:text-slate-900 dark:hover:text-slate-200" onClick={handleToday}>
                     {isToday ? 'Today' : 'Go to Today'}
                 </span>
             </div>
@@ -53,10 +53,10 @@ export default function DateNavigation() {
                     onClick={handleNext}
                     disabled={isAtToday}
                     className={cn(
-                        "p-2 rounded-full transition-colors text-gray-900 dark:text-gray-100",
+                        "p-2 rounded-full transition-colors",
                         isAtToday
-                            ? "text-gray-300 dark:text-gray-700 cursor-not-allowed"
-                            : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                            ? "text-slate-300 dark:text-slate-700 cursor-not-allowed"
+                            : "text-slate-900 dark:text-slate-100 hover:bg-indigo-500/10"
                     )}
                 >
                     <ChevronRight className="w-6 h-6" />

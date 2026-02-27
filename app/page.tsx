@@ -115,7 +115,7 @@ export default async function Home({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-0 z-10">
+      <div className="bg-white dark:bg-[#141720] border-b border-slate-200 dark:border-white/[0.07] sticky top-0 z-10">
         <div className="flex items-center justify-between px-4 py-2">
           <DateNavigation />
           <AchievementBadge achievements={achievements} />
