@@ -26,21 +26,21 @@ export default function ScoreGrid({ scores, wateringStatuses, initialMonth, curr
     const rangeStart = startOfWeek(monthStart, { weekStartsOn: 0 }); // 0 = Sunday
     const days = eachDayOfInterval({ start: rangeStart, end: monthEnd });
 
-    const getScoreColor = (score: number) => {
-        // 5 levels: Red (< -2), Orange (-2 to 0), Gray (0), Light Green (0 to 3), Green (>= 3)
+    const getScoreColor = (score: number, hasData: boolean) => {
+        if (!hasData) {
+            // No activity logged — empty look
+            return 'bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800';
+        }
         if (score === 0) {
-            return 'bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700';
+            // Logged but net zero (even)
+            return 'bg-slate-300 dark:bg-slate-600 border border-slate-400 dark:border-slate-500';
         } else if (score >= 3) {
-            // Level 5: Green (positive, >= 3)
             return 'bg-green-500 dark:bg-green-600 border border-green-600 dark:border-green-700';
         } else if (score > 0) {
-            // Level 4: Light Green (slightly positive, 0 to 3)
             return 'bg-green-300 dark:bg-green-800 border border-green-400 dark:border-green-700';
         } else if (score >= -2) {
-            // Level 2: Orange (slightly negative, -2 to 0)
             return 'bg-orange-300 dark:bg-orange-800 border border-orange-400 dark:border-orange-700';
         } else {
-            // Level 1: Red (negative, < -2)
             return 'bg-red-500 dark:bg-red-600 border border-red-600 dark:border-red-700';
         }
     };
@@ -106,6 +106,7 @@ export default function ScoreGrid({ scores, wateringStatuses, initialMonth, curr
                 {days.map((day) => {
                     const dateStr = format(day, 'yyyy-MM-dd');
                     const scoreData = scores.find((s) => s.date === dateStr);
+                    const hasData = !!scoreData;
                     const score = scoreData ? scoreData.score : 0;
                     const isPreviousMonth = format(day, 'yyyy-MM') !== currentMonth;
                     const isFutureDay = dateStr > localToday;
@@ -120,7 +121,7 @@ export default function ScoreGrid({ scores, wateringStatuses, initialMonth, curr
                             disabled={isFutureDay}
                             className={cn(
                                 "relative aspect-square rounded-md transition-all hover:scale-105 cursor-pointer flex items-center justify-center text-sm font-semibold",
-                                getScoreColor(score),
+                                getScoreColor(score, hasData),
                                 isPreviousMonth && "opacity-30",
                                 isFutureDay && "opacity-40 cursor-not-allowed hover:scale-100",
                                 score >= 3 || score < -2 ? "text-white" : "text-gray-700 dark:text-gray-300",
@@ -128,7 +129,9 @@ export default function ScoreGrid({ scores, wateringStatuses, initialMonth, curr
                             )}
                             title={isFutureDay
                                 ? `${format(day, 'MMM d')} (future day)`
-                                : `${format(day, 'MMM d')}: ${score > 0 ? '+' : ''}${score} pts`}
+                                : !hasData
+                                    ? `${format(day, 'MMM d')}: nothing logged`
+                                    : `${format(day, 'MMM d')}: ${score > 0 ? '+' : ''}${score} pts`}
                         >
                             {dayNumber}
                             {(watering?.plants || watering?.vegetables) && (
@@ -150,11 +153,12 @@ export default function ScoreGrid({ scores, wateringStatuses, initialMonth, curr
                 <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                     <span className="font-medium">Less</span>
                     <div className="flex gap-1.5">
-                        <div className="w-4 h-4 rounded-sm bg-red-500 dark:bg-red-600 border border-red-600 dark:border-red-700" />
-                        <div className="w-4 h-4 rounded-sm bg-orange-300 dark:bg-orange-800 border border-orange-400 dark:border-orange-700" />
-                        <div className="w-4 h-4 rounded-sm bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700" />
-                        <div className="w-4 h-4 rounded-sm bg-green-300 dark:bg-green-800 border border-green-400 dark:border-green-700" />
-                        <div className="w-4 h-4 rounded-sm bg-green-500 dark:bg-green-600 border border-green-600 dark:border-green-700" />
+                        <div className="w-4 h-4 rounded-sm bg-red-500 dark:bg-red-600 border border-red-600 dark:border-red-700" title="< -2" />
+                        <div className="w-4 h-4 rounded-sm bg-orange-300 dark:bg-orange-800 border border-orange-400 dark:border-orange-700" title="-2 to -1" />
+                        <div className="w-4 h-4 rounded-sm bg-slate-300 dark:bg-slate-600 border border-slate-400 dark:border-slate-500" title="Even (0)" />
+                        <div className="w-4 h-4 rounded-sm bg-green-300 dark:bg-green-800 border border-green-400 dark:border-green-700" title="1 to 2" />
+                        <div className="w-4 h-4 rounded-sm bg-green-500 dark:bg-green-600 border border-green-600 dark:border-green-700" title=">= 3" />
+                        <div className="w-4 h-4 rounded-sm bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800" title="Nothing logged" />
                     </div>
                     <span className="font-medium">More</span>
                 </div>

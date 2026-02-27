@@ -50,19 +50,19 @@ export default function TodayFocusCard({
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
-                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-center">
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 flex flex-col items-center">
                         <div className="text-gray-500 dark:text-gray-400">Uptime</div>
                         <div className={cn('font-semibold', uptimeTone)}>
                             {uptimeTotal === 0 ? '—' : `${uptimeUp}/${uptimeTotal}`}
                         </div>
                     </div>
-                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-center">
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 flex flex-col items-center">
                         <div className="text-gray-500 dark:text-gray-400">Score</div>
                         <div className={cn('font-semibold', scoreTone)}>
                             {dailyScore > 0 ? '+' : ''}{dailyScore}
                         </div>
                     </div>
-                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-center">
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 flex flex-col items-center">
                         <div className="text-gray-500 dark:text-gray-400">Weight</div>
                         <div className="font-semibold text-gray-900 dark:text-gray-100">{hasWeightEntry ? 'Logged' : 'Pending'}</div>
                     </div>
