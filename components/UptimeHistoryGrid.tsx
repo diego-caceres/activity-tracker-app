@@ -23,57 +23,45 @@ export default function UptimeHistoryGrid({ projects, history }: UptimeHistoryGr
     }
 
     return (
-        <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-                <thead>
-                    <tr>
-                        <th className="text-left py-2 pr-3 text-gray-600 dark:text-gray-400 font-medium">
-                            Project
-                        </th>
-                        {days.map((day) => (
-                            <th key={day} className="px-1 py-2 text-center text-gray-600 dark:text-gray-400 font-medium min-w-[40px]">
-                                {format(new Date(day + 'T12:00:00'), 'EEE')}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {projects.map((project) => (
-                        <tr key={project.id}>
-                            <td className="py-1.5 pr-3 text-gray-900 dark:text-gray-100 truncate max-w-[120px]">
-                                {project.name}
-                            </td>
-                            {days.map((day) => {
-                                const check = historyMap.get(day);
-                                const result = check?.results.find(
-                                    (r) => r.projectId === project.id
-                                );
+        <div className="space-y-3">
+            {projects.map((project) => (
+                <div key={project.id}>
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-1.5 truncate">
+                        {project.name}
+                    </p>
+                    <div className="grid grid-cols-7 gap-1.5">
+                        {days.map((day) => {
+                            const check = historyMap.get(day);
+                            const result = check?.results.find(
+                                (r) => r.projectId === project.id
+                            );
 
-                                let bgColor = 'bg-gray-200 dark:bg-gray-700';
-                                if (result) {
-                                    bgColor =
-                                        result.status === 'up'
-                                            ? 'bg-green-500 dark:bg-green-600'
-                                            : 'bg-red-500 dark:bg-red-600';
-                                }
+                            let bgColor = 'bg-slate-200 dark:bg-[#141720]';
+                            if (result) {
+                                bgColor = result.status === 'up'
+                                    ? 'bg-green-500 dark:bg-green-600'
+                                    : 'bg-rose-500 dark:bg-rose-600';
+                            }
 
-                                return (
-                                    <td key={day} className="px-1 py-1.5">
-                                        <div
-                                            className={`w-6 h-6 rounded mx-auto ${bgColor}`}
-                                            title={
-                                                result
-                                                    ? `${result.status} - ${result.responseTimeMs ? result.responseTimeMs + 'ms' : 'N/A'}`
-                                                    : 'No data'
-                                            }
-                                        />
-                                    </td>
-                                );
-                            })}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                            return (
+                                <div key={day} className="flex flex-col items-center gap-1">
+                                    <div
+                                        className={`w-full aspect-square rounded-md ${bgColor}`}
+                                        title={
+                                            result
+                                                ? `${format(new Date(day + 'T12:00:00'), 'EEE MMM d')} — ${result.status}${result.responseTimeMs ? ` (${result.responseTimeMs}ms)` : ''}`
+                                                : `${format(new Date(day + 'T12:00:00'), 'EEE MMM d')} — no data`
+                                        }
+                                    />
+                                    <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                        {format(new Date(day + 'T12:00:00'), 'EEE')[0]}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
         </div>
     );
 }

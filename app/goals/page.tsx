@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import GoalCard from '@/components/GoalCard';
 import GoalForm from '@/components/GoalForm';
-import { Plus, Trophy, Target } from 'lucide-react';
+import { Plus, Trophy, Target, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Goal, GoalAchievement } from '@/types';
@@ -42,21 +42,22 @@ export default function GoalsPage() {
 
     if (loading) {
         return (
-            <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
-                <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 px-4 py-4">
+            <div className="flex flex-col h-screen bg-white dark:bg-[#141720]">
+                <div className="bg-white dark:bg-[#141720] border-b border-slate-200 dark:border-white/[0.07] px-4 py-4">
                     <Link
                         href="/"
-                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-2 block"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#1b1f2e] border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-200 dark:hover:bg-white/10 transition-colors mb-3"
                     >
-                        ← Back to Home
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Home
                     </Link>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        <Target className="w-6 h-6" />
+                    <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        <Target className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
                         Goals & Achievements
                     </h1>
                 </div>
                 <div className="flex-1 flex items-center justify-center">
-                    <p className="text-gray-500 dark:text-gray-400">Loading...</p>
+                    <p className="text-slate-500 dark:text-slate-400">Loading...</p>
                 </div>
             </div>
         );
@@ -64,26 +65,27 @@ export default function GoalsPage() {
 
     return (
         <>
-            <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
+            <div className="flex flex-col h-screen bg-white dark:bg-[#141720]">
                 {/* Header */}
-                <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 px-4 py-4">
-                    <div className="flex items-center justify-between mb-2">
+                <div className="bg-white dark:bg-[#141720] border-b border-slate-200 dark:border-white/[0.07] px-4 py-4">
+                    <div className="flex items-center justify-between mb-3">
                         <Link
                             href="/"
-                            className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#1b1f2e] border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
                         >
-                            ← Back to Home
+                            <ArrowLeft className="w-4 h-4" />
+                            Back to Home
                         </Link>
                         <button
                             onClick={() => setShowForm(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
                         >
                             <Plus className="w-4 h-4" />
                             New Goal
                         </button>
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        <Target className="w-6 h-6" />
+                    <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        <Target className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
                         Goals & Achievements
                     </h1>
                 </div>
@@ -93,24 +95,24 @@ export default function GoalsPage() {
                     {/* Active Goals Section */}
                     <section>
                         <div className="flex items-center justify-between mb-3">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                                <Target className="w-5 h-5" />
+                            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                <Target className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                                 Active Goals
-                                <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                <span className="text-sm font-normal text-slate-500 dark:text-slate-400">
                                     ({activeGoals.filter(g => goalsProgress[g.id] >= g.target).length}/{activeGoals.length} achieved)
                                 </span>
                             </h2>
                         </div>
 
                         {activeGoals.length === 0 ? (
-                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center">
-                                <Target className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
-                                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                            <div className="bg-slate-100 dark:bg-[#1b1f2e] rounded-2xl p-6 text-center border border-slate-200 dark:border-white/[0.07]">
+                                <Target className="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto mb-3" />
+                                <p className="text-slate-600 dark:text-slate-400 mb-4">
                                     No active goals yet. Create your first goal to get started!
                                 </p>
                                 <button
                                     onClick={() => setShowForm(true)}
-                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors"
+                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
                                 >
                                     <Plus className="w-4 h-4" />
                                     Create Goal
@@ -134,10 +136,10 @@ export default function GoalsPage() {
                     {/* Completed Goals Section */}
                     {completedGoals.length > 0 && (
                         <section>
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3">
-                                <Trophy className="w-5 h-5 text-green-600 dark:text-green-400" />
+                            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-3">
+                                <Trophy className="w-5 h-5 text-green-500 dark:text-green-400" />
                                 Completed Goals
-                                <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                <span className="text-sm font-normal text-slate-500 dark:text-slate-400">
                                     ({completedGoals.length})
                                 </span>
                             </h2>
@@ -158,10 +160,10 @@ export default function GoalsPage() {
                     {/* Achievements Section */}
                     {achievements.length > 0 && (
                         <section>
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3">
-                                <Trophy className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-3">
+                                <Trophy className="w-5 h-5 text-warning" />
                                 Achievement History
-                                <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                <span className="text-sm font-normal text-slate-500 dark:text-slate-400">
                                     ({achievements.length})
                                 </span>
                             </h2>
@@ -169,22 +171,22 @@ export default function GoalsPage() {
                                 {achievements.map((achievement) => (
                                     <div
                                         key={achievement.id}
-                                        className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800"
+                                        className="bg-green-500/5 dark:bg-green-500/5 rounded-2xl p-4 border border-green-500/20"
                                     >
                                         <div className="flex items-start gap-3">
-                                            <div className="flex-shrink-0 w-10 h-10 bg-green-600 dark:bg-green-500 rounded-full flex items-center justify-center">
+                                            <div className="flex-shrink-0 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
                                                 <Trophy className="w-5 h-5 text-white" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                                                <h3 className="font-medium text-slate-900 dark:text-slate-100">
                                                     {achievement.goalSnapshot.title}
                                                 </h3>
                                                 {achievement.goalSnapshot.description && (
-                                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
                                                         {achievement.goalSnapshot.description}
                                                     </p>
                                                 )}
-                                                <div className="flex items-center gap-4 mt-2 text-xs text-gray-600 dark:text-gray-400">
+                                                <div className="flex items-center gap-4 mt-2 text-xs text-slate-500 dark:text-slate-400">
                                                     <span>
                                                         Final: {Math.round(achievement.finalProgress)} / {achievement.goalSnapshot.target}
                                                     </span>
@@ -203,13 +205,13 @@ export default function GoalsPage() {
                     {/* Empty State for Achievements */}
                     {achievements.length === 0 && activeGoals.length > 0 && (
                         <section>
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3">
-                                <Trophy className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-3">
+                                <Trophy className="w-5 h-5 text-amber-500 dark:text-amber-400" />
                                 Achievement History
                             </h2>
-                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center">
-                                <Trophy className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
-                                <p className="text-gray-600 dark:text-gray-400">
+                            <div className="bg-slate-100 dark:bg-[#1b1f2e] rounded-2xl p-6 text-center border border-slate-200 dark:border-white/[0.07]">
+                                <Trophy className="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto mb-3" />
+                                <p className="text-slate-600 dark:text-slate-400">
                                     No achievements yet. Complete a goal to earn your first achievement!
                                 </p>
                             </div>

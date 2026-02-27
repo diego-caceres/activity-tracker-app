@@ -63,14 +63,14 @@ export default function UptimeStatusCard({ projects, dailyCheck, currentDate }: 
                 <div className="flex items-center justify-between">
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300 transition-colors -ml-1 p-1"
+                        className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100 hover:text-slate-700 dark:hover:text-slate-300 transition-colors -ml-1 p-1"
                     >
-                        <Radio className="w-4 h-4 flex-shrink-0" />
+                        <Radio className="w-4 h-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
                         <span>Up Status</span>
                         {isChecking ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-500" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-500" />
                         ) : localCheck ? (
-                            <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
+                            <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
                                 ({upCount}/{totalCount} up)
                             </span>
                         ) : null}
@@ -85,7 +85,7 @@ export default function UptimeStatusCard({ projects, dailyCheck, currentDate }: 
                 {isExpanded && (
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
                         {isChecking && !localCheck ? (
-                            <div className="flex items-center justify-center py-4 text-sm text-gray-500 dark:text-gray-400">
+                            <div className="flex items-center justify-center py-4 text-sm text-slate-500 dark:text-slate-400">
                                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
                                 Checking projects...
                             </div>
@@ -100,20 +100,20 @@ export default function UptimeStatusCard({ projects, dailyCheck, currentDate }: 
                                     return (
                                         <div
                                             key={project.id}
-                                            className="flex items-center justify-between py-1.5 px-2 bg-gray-50 dark:bg-gray-800 rounded"
+                                            className="flex items-center justify-between py-1.5 px-2 bg-slate-50 dark:bg-[#1b1f2e] rounded-lg border border-slate-100 dark:border-white/[0.05]"
                                         >
                                             <div className="flex items-center gap-2 min-w-0">
                                                 {isUp ? (
-                                                    <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                                    <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 flex-shrink-0" />
                                                 ) : (
-                                                    <XCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                                    <XCircle className="w-4 h-4 text-rose-500 dark:text-rose-400 flex-shrink-0" />
                                                 )}
-                                                <span className="text-sm text-gray-900 dark:text-gray-100 truncate">
+                                                <span className="text-sm text-slate-900 dark:text-slate-100 truncate">
                                                     {project.name}
                                                 </span>
                                             </div>
                                             {result?.responseTimeMs && (
-                                                <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
+                                                <span className="text-xs text-slate-500 dark:text-slate-400 flex-shrink-0 ml-2">
                                                     {result.responseTimeMs}ms
                                                 </span>
                                             )}
@@ -122,14 +122,14 @@ export default function UptimeStatusCard({ projects, dailyCheck, currentDate }: 
                                 })}
                             </div>
                         ) : (
-                            <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                            <div className="text-sm text-slate-500 dark:text-slate-400 text-center py-2">
                                 No check data for this date
                             </div>
                         )}
 
                         <Link
                             href="/uptime"
-                            className="flex items-center justify-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline py-2"
+                            className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"
                         >
                             View Uptime Page
                             <ExternalLink className="w-3.5 h-3.5" />

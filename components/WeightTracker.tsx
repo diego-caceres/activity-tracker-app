@@ -217,19 +217,19 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
             : <Minus className="w-4 h-4" />;
 
     return (
-        <div id="weight-section" className="p-4 space-y-3 border-t bg-emerald-50/30 dark:bg-emerald-950/20 border-gray-200 dark:border-gray-800">
+        <div id="weight-section" className="p-4 space-y-3 border-t border-slate-200 dark:border-white/[0.07] bg-white dark:bg-[#141720]">
             <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                    <Scale className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <h2 className="text-xl font-black flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                    <Scale className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                     Weight Trend
                 </h2>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                     {chart.loggedPoints.length}/{CHART_DAYS} days logged
                 </span>
             </div>
 
-            <form onSubmit={handleSaveWeight} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-3 shadow-sm space-y-2">
-                <label className="text-sm font-medium text-gray-800 dark:text-gray-200">
+            <form onSubmit={handleSaveWeight} className="bg-white dark:bg-[#1b1f2e] rounded-2xl border border-slate-200 dark:border-white/[0.07] p-3 space-y-2">
+                <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
                     Weight for {format(anchorDate, 'MMM d')}
                 </label>
                 <div className="flex gap-2">
@@ -245,7 +245,7 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
                             }
                         }}
                         placeholder="e.g. 178.4"
-                        className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="flex-1 px-3 py-2 rounded-lg border border-slate-300 dark:border-white/[0.07] bg-white dark:bg-[#141720] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <button
                         type="submit"
@@ -253,29 +253,29 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
                         className={cn(
                             'px-4 py-2 rounded-lg text-sm font-semibold transition-colors',
                             isSaving
-                                ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                                : 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer'
+                                ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                                : 'bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer'
                         )}
                     >
                         {isSaving ? 'Saving...' : 'Save'}
                     </button>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                     Use one consistent unit (lb or kg).
                 </p>
                 {feedback && (
                     <p className={cn(
                         'text-xs font-medium',
-                        feedback === 'Saved.' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+                        feedback === 'Saved.' ? 'text-indigo-600 dark:text-indigo-400' : 'text-rose-600 dark:text-rose-400'
                     )}>
                         {feedback}
                     </p>
                 )}
             </form>
 
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-3 shadow-sm">
+            <div className="bg-white dark:bg-[#1b1f2e] rounded-2xl border border-slate-200 dark:border-white/[0.07] p-3">
                 {chart.loggedPoints.length === 0 ? (
-                    <div className="h-[170px] flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
+                    <div className="h-[170px] flex items-center justify-center text-sm text-slate-500 dark:text-slate-400">
                         No data yet. Log today to start your trend.
                     </div>
                 ) : (
@@ -295,15 +295,15 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
                                     y2={tick.y}
                                     stroke="currentColor"
                                     strokeWidth="0.2"
-                                    className="text-gray-300 dark:text-gray-700"
+                                    className="text-slate-200 dark:text-white/5"
                                     vectorEffect="non-scaling-stroke"
                                 />
                             ))}
 
                             <defs>
                                 <linearGradient id="weightTrendFill" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity="0.28" />
-                                    <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity="0.04" />
+                                    <stop offset="0%" stopColor="#6366f1" stopOpacity="0.28" />
+                                    <stop offset="100%" stopColor="#6366f1" stopOpacity="0.04" />
                                 </linearGradient>
                             </defs>
 
@@ -315,7 +315,7 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
                                 <path
                                     d={chart.linePath}
                                     fill="none"
-                                    stroke={trendTone === 'up' ? 'rgb(245, 158, 11)' : 'rgb(16, 185, 129)'}
+                                    stroke="#6366f1"
                                     strokeWidth="2"
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -328,16 +328,15 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
                         <div className="absolute top-0 left-0 right-0" style={{ height: CHART_HEIGHT }} onClick={() => setSelectedPoint(null)}>
                             {chart.loggedPoints.map((point) => {
                                 const isSelected = selectedPoint === point.date;
-                                const dotColor = trendTone === 'up' ? 'rgb(245, 158, 11)' : 'rgb(16, 185, 129)';
                                 return (
                                     <div key={point.date}>
                                         <button
                                             type="button"
-                                            className="absolute -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 bg-white dark:bg-gray-900 cursor-pointer"
+                                            className="absolute -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 bg-white dark:bg-[#1b1f2e] cursor-pointer"
                                             style={{
                                                 left: `${point.x}%`,
                                                 top: `${(point.y / CHART_HEIGHT) * 100}%`,
-                                                borderColor: dotColor,
+                                                borderColor: '#6366f1',
                                             }}
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -346,7 +345,7 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
                                         />
                                         {isSelected && (
                                             <div
-                                                className="absolute -translate-x-1/2 pointer-events-none z-10 px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 shadow-lg"
+                                                className="absolute -translate-x-1/2 pointer-events-none z-10 px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-lg"
                                                 style={{
                                                     left: `${point.x}%`,
                                                     top: `${(point.y / CHART_HEIGHT) * 100}%`,
@@ -363,13 +362,13 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
 
                         <div className="absolute inset-y-0 left-0 flex flex-col justify-between pointer-events-none">
                             {chart.yTicks.slice().reverse().map((tick) => (
-                                <span key={tick.y} className="text-[10px] text-gray-500 dark:text-gray-400 -translate-x-1">
+                                <span key={tick.y} className="text-[10px] text-slate-500 dark:text-slate-400 -translate-x-1">
                                     {formatWeight(tick.value)}
                                 </span>
                             ))}
                         </div>
 
-                        <div className="mt-2 flex justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                        <div className="mt-2 flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
                             {labelIndexes.map((index) => (
                                 <span key={index}>{chart.allPoints[index].label}</span>
                             ))}
@@ -379,27 +378,27 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-sm">
-                <div className="rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-2">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Start</div>
-                    <div className="font-semibold text-gray-900 dark:text-gray-100">
+                <div className="rounded-xl bg-slate-50 dark:bg-[#1b1f2e] border border-slate-200 dark:border-white/[0.07] p-2">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Start</div>
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">
                         {trendStats.first ? formatWeight(trendStats.first.weight) : '--'}
                     </div>
                 </div>
-                <div className="rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-2">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Latest</div>
-                    <div className="font-semibold text-gray-900 dark:text-gray-100">
+                <div className="rounded-xl bg-slate-50 dark:bg-[#1b1f2e] border border-slate-200 dark:border-white/[0.07] p-2">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Latest</div>
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">
                         {trendStats.latest ? formatWeight(trendStats.latest.weight) : '--'}
                     </div>
                 </div>
-                <div className="rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-2">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Change</div>
+                <div className="rounded-xl bg-slate-50 dark:bg-[#1b1f2e] border border-slate-200 dark:border-white/[0.07] p-2">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Change</div>
                     <div className={cn(
                         'font-semibold',
                         trendStats.change === null
-                            ? 'text-gray-500 dark:text-gray-400'
+                            ? 'text-slate-500 dark:text-slate-400'
                             : trendStats.change <= 0
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : 'text-amber-600 dark:text-amber-400'
+                                ? 'text-green-500 dark:text-green-400'
+                                : 'text-rose-500 dark:text-rose-400'
                     )}>
                         {trendStats.change === null ? '--' : `${trendStats.change > 0 ? '+' : ''}${trendStats.change.toFixed(1)}`}
                     </div>
@@ -407,12 +406,12 @@ export default function WeightTracker({ date, entry, entries }: WeightTrackerPro
             </div>
 
             <div className={cn(
-                'rounded-xl border p-3 text-sm flex items-start gap-2',
+                'rounded-2xl border p-3 text-sm flex items-start gap-2',
                 trendTone === 'down'
-                    ? 'bg-emerald-100/60 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                    ? 'bg-green-500/10 border-green-500/20 text-green-900 dark:text-green-300'
                     : trendTone === 'up'
-                        ? 'bg-amber-100/60 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200'
-                        : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                        ? 'bg-rose-500/10 border-rose-500/20 text-rose-900 dark:text-rose-300'
+                        : 'bg-slate-100 dark:bg-[#1b1f2e] border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-slate-300'
             )}>
                 <span className="mt-0.5">{trendIcon}</span>
                 <span>{trendMessage}</span>

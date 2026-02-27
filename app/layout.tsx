@@ -35,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.className} antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100`}
+        className={`${inter.className} antialiased bg-slate-50 dark:bg-[#0c0e14]`}
       >
         <ThemeProvider
           attribute="class"
@@ -43,7 +43,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="max-w-md mx-auto h-screen bg-white dark:bg-gray-900 shadow-2xl overflow-hidden flex flex-col">
+          <div className="max-w-md mx-auto h-screen bg-white dark:bg-[#141720] shadow-none overflow-hidden flex flex-col">
             {children}
           </div>
         </ThemeProvider>

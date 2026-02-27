@@ -99,12 +99,7 @@ export default function HabitTracker({ date, definitions, events, dailyScore, ha
         setIsAdding(null);
 
         startTransition(() => {
-            if (!existingDefinition) {
-                updateOptimisticState({ type: 'add', event: newEvent, definition: newDefinition });
-            } else {
-                // Definition already exists, just add the event
-                updateOptimisticState({ type: 'add', event: newEvent, definition: newDefinition });
-            }
+            updateOptimisticState({ type: 'add', event: newEvent, definition: newDefinition });
             updateOptimisticScore(score);
             updateOptimisticLastUsed({ habitId, timestamp: Date.now() });
         });
@@ -122,65 +117,65 @@ export default function HabitTracker({ date, definitions, events, dailyScore, ha
     };
 
     return (
-        <div id="habits-section" className="p-4 space-y-3 border-t bg-gray-50/50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800">
+        <div id="habits-section" className="p-4 space-y-3 border-t border-slate-200 dark:border-white/[0.07] bg-white dark:bg-[#141720]">
             <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                    <Activity className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                <h2 className="text-xl font-black flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                    <Activity className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                     Habits
                 </h2>
                 <div className={cn(
                     "px-3 py-1 rounded-full font-bold text-sm transition-colors",
-                    optimisticScore > 0 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" :
-                        optimisticScore < 0 ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    optimisticScore > 0 ? "bg-green-500/10 text-green-700 dark:text-green-400" :
+                        optimisticScore < 0 ? "bg-rose-500/10 text-rose-700 dark:text-rose-400" : "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400"
                 )}>
                     Score: {optimisticScore > 0 ? '+' : ''}{optimisticScore}
                 </div>
             </div>
 
             {/* Logged Habits List */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-[#1b1f2e] rounded-2xl overflow-hidden border border-slate-200 dark:border-white/[0.07]">
                 {optimisticState.events.length === 0 && (
-                    <div className="p-4 text-gray-500 dark:text-gray-400 text-center">No habits logged today.</div>
+                    <div className="p-4 text-slate-500 dark:text-slate-400 text-center">No habits logged today.</div>
                 )}
 
                 {optimisticState.events.map((event, index) => (
                     <div key={event.id}>
-                        <div className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <div className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                             {getHabitIcon(event.habitId) && (
                                 <span className="text-xl flex-shrink-0">{getHabitIcon(event.habitId)}</span>
                             )}
-                            <span className="flex-1 text-gray-900 dark:text-gray-100">{getHabitName(event.habitId)}</span>
+                            <span className="flex-1 text-slate-900 dark:text-slate-100">{getHabitName(event.habitId)}</span>
                             <span className={cn(
                                 "text-sm font-medium flex-shrink-0",
-                                getHabitType(event.habitId) === 'healthy' ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                                getHabitType(event.habitId) === 'healthy' ? "text-green-500 dark:text-green-400" : "text-rose-500 dark:text-rose-400"
                             )}>
                                 {event.scoreSnapshot > 0 ? '+' : ''}{event.scoreSnapshot}
                             </span>
                             <button
                                 onClick={() => handleDeleteEvent(event.id, event.scoreSnapshot)}
-                                className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 p-1 transition-colors cursor-pointer"
+                                className="text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 p-1 transition-colors cursor-pointer"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         </div>
-                        {index < optimisticState.events.length - 1 && <div className="border-t border-gray-100 dark:border-gray-700 ml-14" />}
+                        {index < optimisticState.events.length - 1 && <div className="border-t border-slate-100 dark:border-white/[0.05] ml-14" />}
                     </div>
                 ))}
 
                 {/* Add Habit Buttons at the bottom */}
-                {optimisticState.events.length > 0 && <div className="border-t border-gray-200 dark:border-gray-700" />}
+                {optimisticState.events.length > 0 && <div className="border-t border-slate-200 dark:border-white/[0.07]" />}
                 <div className="grid grid-cols-2 gap-0">
                     <button
                         id="habit-quick-healthy"
                         onClick={() => setIsAdding(isAdding === 'healthy' ? null : 'healthy')}
-                        className="flex items-center justify-center gap-2 px-4 py-3 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors border-r border-gray-200 dark:border-gray-700 cursor-pointer"
+                        className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors border-r border-slate-200 dark:border-white/[0.07] cursor-pointer"
                     >
                         <Plus className="w-5 h-5 flex-shrink-0" />
                         <span className="font-medium">Healthy</span>
                     </button>
                     <button
                         onClick={() => setIsAdding(isAdding === 'unhealthy' ? null : 'unhealthy')}
-                        className="flex items-center justify-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors cursor-pointer"
+                        className="flex items-center justify-center gap-2 px-4 py-3 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
                     >
                         <Plus className="w-5 h-5 flex-shrink-0" />
                         <span className="font-medium">Unhealthy</span>
@@ -190,14 +185,14 @@ export default function HabitTracker({ date, definitions, events, dailyScore, ha
 
             {/* Habit Selection Modal */}
             {isAdding && (
-                <div className="p-4 bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                <div className="p-4 bg-white dark:bg-[#1b1f2e] rounded-2xl border border-slate-200 dark:border-white/[0.07] space-y-4 animate-in fade-in slide-in-from-bottom-2">
                     <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                        <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
                             Select a {isAdding === 'healthy' ? 'Healthy' : 'Unhealthy'} Habit to Log
                         </h3>
                         <button
                             onClick={() => setIsAdding(null)}
-                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                         >
                             <Plus className="w-5 h-5 rotate-45" />
                         </button>
@@ -209,17 +204,17 @@ export default function HabitTracker({ date, definitions, events, dailyScore, ha
                                 key={habit.id}
                                 onClick={() => handleAddHabit(habit.id, habit.name, habit.type, habit.score, habit.icon)}
                                 className={cn(
-                                    "p-2 rounded-lg border text-left text-sm transition-colors flex flex-col gap-1 dark:bg-gray-700/50 dark:border-gray-600 cursor-pointer",
+                                    "p-2 rounded-xl border border-slate-200 dark:border-white/[0.07] text-left text-sm transition-colors flex flex-col gap-1 dark:bg-[#141720]/80 cursor-pointer",
                                     habit.type === 'healthy'
-                                        ? "hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-200 dark:hover:border-green-800"
-                                        : "hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800"
+                                        ? "hover:bg-green-50 dark:hover:bg-green-500/10 hover:border-green-200 dark:hover:border-green-800/50"
+                                        : "hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:border-rose-200 dark:hover:border-rose-800/50"
                                 )}
                             >
                                 <span className="text-lg">{habit.icon}</span>
-                                <span className="font-medium text-gray-900 dark:text-gray-100">{habit.name}</span>
+                                <span className="font-medium text-slate-900 dark:text-slate-100">{habit.name}</span>
                                 <span className={cn(
                                     "text-xs",
-                                    habit.type === 'healthy' ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                                    habit.type === 'healthy' ? "text-green-500 dark:text-green-400" : "text-rose-500 dark:text-rose-400"
                                 )}>
                                     {habit.score > 0 ? '+' : ''}{habit.score} pts
                                 </span>

@@ -101,7 +101,7 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
 
     const handleToggleTodo = async (todo: Todo) => {
         const newStatus = todo.status === 'done' ? 'pending' : 'done';
-        const todoDate = todo.date; // Use the original date of the todo
+        const todoDate = todo.date;
 
         startTransition(() => {
             updateOptimisticTodos({ type: 'toggle', id: todo.id, status: newStatus });
@@ -112,7 +112,7 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
     };
 
     const handleDeleteTodo = async (todo: Todo) => {
-        const todoDate = todo.date; // Use the original date of the todo
+        const todoDate = todo.date;
 
         startTransition(() => {
             updateOptimisticTodos({ type: 'delete', id: todo.id });
@@ -161,7 +161,6 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
         const currentTouch = e.touches[0].clientX;
         const diff = touchStart - currentTouch;
 
-        // Only allow left swipe (positive diff) and limit to 80px
         if (diff > 0) {
             setSwipeOffset(Math.min(diff, 80));
         } else {
@@ -171,7 +170,6 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
 
     const handleTouchEnd = () => {
         setTouchStart(null);
-        // If swiped more than 40px, keep it open, otherwise close
         if (swipeOffset < 40) {
             setSwipeOffset(0);
             setSwipingId(null);
@@ -193,14 +191,14 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
                     {/* Delete button background (revealed on swipe) */}
                     <button
                         onClick={() => handleDeleteTodo(todo)}
-                        className="absolute inset-0 bg-red-500 flex items-center justify-end pr-4"
+                        className="absolute inset-0 bg-rose-500 flex items-center justify-end pr-4"
                     >
                         <Trash2 className="w-5 h-5 text-white" />
                     </button>
 
                     {/* Main content */}
                     <div
-                        className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all bg-white dark:bg-gray-900 relative"
+                        className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-all bg-white dark:bg-[#1b1f2e] relative"
                         style={{
                             transform: `translateX(-${offset}px)`,
                             transition: touchStart === null ? 'transform 0.3s ease' : 'none'
@@ -214,8 +212,8 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
                             className={cn(
                                 "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 mt-1",
                                 todo.status === 'done'
-                                    ? "bg-blue-500 border-blue-500"
-                                    : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
+                                    ? "bg-indigo-600 border-indigo-600"
+                                    : "border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500"
                             )}
                         >
                             {todo.status === 'done' && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
@@ -237,7 +235,7 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
                                     }}
                                     autoFocus
                                     rows={2}
-                                    className="w-full px-2 py-1 text-sm rounded border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none"
+                                    className="w-full px-2 py-1 text-sm rounded border border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-[#1b1f2e] text-slate-900 dark:text-slate-100 resize-none"
                                 />
                             ) : (
                                 <button
@@ -246,8 +244,8 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
                                 >
                                     <div
                                         className={cn(
-                                            "text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words",
-                                            todo.status === 'done' && "line-through text-gray-400 dark:text-gray-500"
+                                            "text-slate-900 dark:text-slate-100 whitespace-pre-wrap break-words",
+                                            todo.status === 'done' && "line-through text-slate-400 dark:text-slate-500"
                                         )}
                                         style={{
                                             display: '-webkit-box',
@@ -270,28 +268,28 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
                         {/* Delete button - hidden by default, visible on hover (desktop) */}
                         <button
                             onClick={() => handleDeleteTodo(todo)}
-                            className="text-gray-400 hover:text-red-500 p-1 transition-all mt-1 opacity-0 group-hover:opacity-100 cursor-pointer"
+                            className="text-slate-400 hover:text-rose-500 p-1 transition-all mt-1 opacity-0 group-hover:opacity-100 cursor-pointer"
                         >
                             <Trash2 className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
-                {index < total - 1 && <div className="border-t border-gray-100 dark:border-gray-800 ml-14" />}
+                {index < total - 1 && <div className="border-t border-slate-100 dark:border-white/5 ml-14" />}
             </Fragment>
         );
     };
 
     return (
-        <div id="todos-section" className="p-4 space-y-3">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Todos</h2>
+        <div id="todos-section" className="p-4 space-y-3 bg-white dark:bg-[#141720]">
+            <h2 className="text-xl font-black text-slate-900 dark:text-slate-100">Todos</h2>
 
-            <div className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-800">
+            <div className="bg-white dark:bg-[#1b1f2e] rounded-2xl overflow-hidden border border-slate-200 dark:border-white/[0.07]">
                 {!hasAnyTodos && (
-                    <div className="p-4 text-gray-500 dark:text-gray-400 text-center">No todos for this day.</div>
+                    <div className="p-4 text-slate-500 dark:text-slate-400 text-center">No todos for this day.</div>
                 )}
 
                 {overdueList.length > 0 && (
-                    <div className="border-b border-gray-200 dark:border-gray-800">
+                    <div className="border-b border-slate-200 dark:border-white/[0.07]">
                         <button
                             onClick={() => setShowOverdue(!showOverdue)}
                             className="w-full flex items-center justify-between px-4 py-3 bg-amber-50/70 dark:bg-amber-950/20 text-left"
@@ -309,15 +307,15 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
                 {showOverdue && overdueList.map((todo, index) => renderTodoItem(todo, index, overdueList.length))}
 
                 {showOverdue && overdueList.length > 0 && todayTodos.length > 0 && (
-                    <div className="border-t border-gray-200 dark:border-gray-800" />
+                    <div className="border-t border-slate-200 dark:border-white/[0.07]" />
                 )}
 
                 {todayTodos.length > 0 && todayTodos.map((todo, index) => renderTodoItem(todo, index, todayTodos.length))}
 
                 {/* Add Todo Input at the bottom */}
-                {hasAnyTodos && <div className="border-t border-gray-200 dark:border-gray-800" />}
-                <form onSubmit={handleAddTodo} className="flex items-start gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800">
-                    <Plus className="w-5 h-5 text-blue-500 flex-shrink-0 mt-1" />
+                {hasAnyTodos && <div className="border-t border-slate-200 dark:border-white/[0.07]" />}
+                <form onSubmit={handleAddTodo} className="flex items-start gap-3 px-4 py-3 bg-slate-50 dark:bg-[#141720]">
+                    <Plus className="w-5 h-5 text-indigo-500 flex-shrink-0 mt-1" />
                     <textarea
                         id="todo-add-input"
                         value={newTodoTitle}
@@ -330,11 +328,11 @@ export default function TodoList({ date, todos, overdueTodos }: TodoListProps) {
                         }}
                         placeholder="Add a todo..."
                         rows={2}
-                        className="flex-1 bg-transparent focus:outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none"
+                        className="flex-1 bg-transparent focus:outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 resize-none"
                     />
                     <button
                         type="submit"
-                        className="px-3 py-1.5 mt-0.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
+                        className="px-3 py-1.5 mt-0.5 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors cursor-pointer"
                     >
                         Add
                     </button>
